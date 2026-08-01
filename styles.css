@@ -249,7 +249,7 @@ body { font-family: var(--font-body); background: var(--bg-primary); color: var(
 .check-list li::before { content: '✓'; position: absolute; left: 0; color: var(--accent-cyan); font-weight: 700; }
 
 /* ===== SERVICES GRID (4-col mini) ===== */
-.services-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+.services-grid-4 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .mini-service { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; transition: var(--transition); }
 .mini-service:hover { border-color: rgba(0,245,212,0.3); transform: translateY(-3px); box-shadow: var(--glow-cyan); }
 .mini-service a { text-decoration: none; color: inherit; display: block; }
