@@ -106,7 +106,7 @@ async function transcribeAudio(file) {
 async function analyzeSentiment(transcript) {
     updateProcessing('Running sentiment analysis (LLM)...');
 
-    const analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nRequired JSON fields:\n- "duration_estimate": estimated call duration in "MM:SS" format\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of numbers from -1.0 to 1.0 for each conversation turn (customer perspective)\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
+    const analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nIMPORTANT: First, identify the speakers in the conversation. Label them as "Host" (the agent/executive/caller making the business call) and "Customer" (the person being called). Then reconstruct the conversation with speaker labels.\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Host" or "Customer", "text": "what they said"} for each dialogue turn\n- "duration_estimate": estimated call duration in "MM:SS" format\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Host" or "Customer", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description of what was said"}\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
 
     let response;
     try {
@@ -178,6 +178,7 @@ function parseLLMResponse(text) {
 
     // Fallback
     return {
+        diarized_transcript: [],
         duration_estimate: "N/A",
         customer_sentiment: "Unknown",
         host_sentiment: "Unknown",
@@ -189,12 +190,13 @@ function parseLLMResponse(text) {
         resolution_summary: "Please try again",
         customer_rating: 5,
         host_rating: 5,
-        sentiment_timeline: [0],
+        sentiment_timeline: [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}],
     };
 }
 
 function normalizeResult(data) {
     const defaults = {
+        diarized_transcript: [],
         duration_estimate: "N/A",
         customer_sentiment: "Neutral",
         host_sentiment: "Professional",
@@ -206,7 +208,7 @@ function normalizeResult(data) {
         resolution_summary: "N/A",
         customer_rating: 5,
         host_rating: 5,
-        sentiment_timeline: [0],
+        sentiment_timeline: [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}],
     };
     for (const key in defaults) {
         if (!(key in data)) data[key] = defaults[key];
@@ -214,9 +216,21 @@ function normalizeResult(data) {
     // Clamp ratings
     data.customer_rating = Math.max(1, Math.min(10, parseInt(data.customer_rating) || 5));
     data.host_rating = Math.max(1, Math.min(10, parseInt(data.host_rating) || 5));
-    // Clamp timeline
-    if (!Array.isArray(data.sentiment_timeline)) data.sentiment_timeline = [0];
-    data.sentiment_timeline = data.sentiment_timeline.map(v => Math.max(-1, Math.min(1, parseFloat(v) || 0)));
+    // Normalize timeline - support both old format (array of numbers) and new format (array of objects)
+    if (!Array.isArray(data.sentiment_timeline)) data.sentiment_timeline = [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}];
+    data.sentiment_timeline = data.sentiment_timeline.map((v, i) => {
+        if (typeof v === 'number') {
+            return { turn: i + 1, speaker: "Unknown", sentiment: Math.max(-1, Math.min(1, v)), summary: "" };
+        }
+        return {
+            turn: v.turn || i + 1,
+            speaker: v.speaker || "Unknown",
+            sentiment: Math.max(-1, Math.min(1, parseFloat(v.sentiment) || 0)),
+            summary: v.summary || ""
+        };
+    });
+    // Ensure diarized_transcript is an array
+    if (!Array.isArray(data.diarized_transcript)) data.diarized_transcript = [];
     return data;
 }
 
@@ -300,9 +314,14 @@ function displayResults(data) {
     document.getElementById('custRatingBar').style.width = (custRating * 10) + '%';
     document.getElementById('hostRatingBar').style.width = (hostRating * 10) + '%';
 
-    document.getElementById('transcriptBox').innerHTML = formatTranscript(data.transcript || '');
+    // Use diarized transcript if available, otherwise fall back to raw
+    if (data.diarized_transcript && data.diarized_transcript.length > 0) {
+        document.getElementById('transcriptBox').innerHTML = formatDiarizedTranscript(data.diarized_transcript);
+    } else {
+        document.getElementById('transcriptBox').innerHTML = formatTranscript(data.transcript || '');
+    }
 
-    drawSentimentChart(data.sentiment_timeline || [0]);
+    drawSentimentChart(data.sentiment_timeline || [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}]);
 
     colorSentiment('metricCustSentiment', data.customer_sentiment);
     colorSentiment('metricHostSentiment', data.host_sentiment);
@@ -320,6 +339,23 @@ function formatTranscript(text) {
             return `<div class="turn"><span class="speaker-host">${parts[0]}:</span>${parts.slice(1).join(':')}</div>`;
         }
         return `<div class="turn">${line}</div>`;
+    }).join('');
+}
+
+function formatDiarizedTranscript(turns) {
+    return turns.map((turn, i) => {
+        const speaker = turn.speaker || 'Unknown';
+        const text = turn.text || '';
+        const isHost = speaker.toLowerCase().includes('host') || speaker.toLowerCase().includes('agent');
+        const speakerClass = isHost ? 'speaker-host' : 'speaker-customer';
+        const icon = isHost ? '🎧' : '👤';
+        return `<div class="turn diarized-turn">
+            <span class="turn-number">${i + 1}</span>
+            <span class="${speakerClass}">${icon} ${speaker}:</span>
+            <span class="turn-text">${text}</span>
+        </div>`;
+    }).join('');
+}
     }).join('');
 }
 
@@ -353,98 +389,182 @@ function drawSentimentChart(data) {
 
     ctx.clearRect(0, 0, w, h);
 
-    // Grid
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-        const y = (h / 4) * i;
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-    }
+    // Extract sentiment values (support both old array-of-numbers and new array-of-objects)
+    const points = data.map((d, i) => {
+        if (typeof d === 'number') return { turn: i + 1, speaker: '', sentiment: d, summary: '' };
+        return d;
+    });
+    const values = points.map(p => p.sentiment);
 
-    // Zero line
-    const zeroY = h / 2;
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(0, zeroY); ctx.lineTo(w, zeroY); ctx.stroke();
-    ctx.setLineDash([]);
+    // Layout
+    const topPad = 35, bottomPad = 55, leftPad = 50, rightPad = 20;
+    const graphW = w - leftPad - rightPad;
+    const graphH = h - topPad - bottomPad;
+    const zeroY = topPad + graphH / 2;
 
-    // Labels
+    // Background zones
+    // Positive zone (green tint)
+    const posGrad = ctx.createLinearGradient(0, topPad, 0, zeroY);
+    posGrad.addColorStop(0, 'rgba(16, 185, 129, 0.08)');
+    posGrad.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
+    ctx.fillStyle = posGrad;
+    ctx.fillRect(leftPad, topPad, graphW, graphH / 2);
+
+    // Negative zone (red tint)
+    const negGrad = ctx.createLinearGradient(0, zeroY, 0, topPad + graphH);
+    negGrad.addColorStop(0, 'rgba(247, 37, 133, 0.01)');
+    negGrad.addColorStop(1, 'rgba(247, 37, 133, 0.08)');
+    ctx.fillStyle = negGrad;
+    ctx.fillRect(leftPad, zeroY, graphW, graphH / 2);
+
+    // Grid lines with labels
     ctx.font = '10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText('Positive', 4, 14);
-    ctx.fillText('Negative', 4, h - 6);
+    ctx.textAlign = 'right';
+    const yLabels = [
+        { val: 1.0, label: 'Happy' },
+        { val: 0.5, label: 'Pleased' },
+        { val: 0, label: 'Neutral' },
+        { val: -0.5, label: 'Unhappy' },
+        { val: -1.0, label: 'Angry' }
+    ];
+    yLabels.forEach(({ val, label }) => {
+        const y = zeroY - val * (graphH / 2);
+        ctx.strokeStyle = val === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = val === 0 ? 1.5 : 0.5;
+        ctx.setLineDash(val === 0 ? [] : [3, 3]);
+        ctx.beginPath(); ctx.moveTo(leftPad, y); ctx.lineTo(leftPad + graphW, y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = val === 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)';
+        ctx.fillText(label, leftPad - 8, y + 4);
+    });
 
-    if (data.length < 2) {
-        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    // Title / Legend
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 11px Space Grotesk, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillText('Conversation Flow', leftPad, 14);
+
+    // Legend items
+    ctx.font = '9px Inter, sans-serif';
+    const legendX = leftPad + 140;
+    ctx.fillStyle = '#10b981'; ctx.fillRect(legendX, 7, 8, 8); 
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Positive', legendX + 12, 14);
+    ctx.fillStyle = '#f59e0b'; ctx.fillRect(legendX + 60, 7, 8, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Neutral', legendX + 74, 14);
+    ctx.fillStyle = '#f72585'; ctx.fillRect(legendX + 125, 7, 8, 8);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Negative', legendX + 137, 14);
+
+    if (values.length < 2) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
         ctx.font = '12px Space Grotesk, sans-serif';
-        ctx.fillText('Not enough data points', w / 2 - 60, h / 2);
+        ctx.textAlign = 'center';
+        ctx.fillText('Not enough data points for timeline', w / 2, h / 2);
         return;
     }
 
-    const padding = 30;
-    const graphW = w - padding * 2;
-    const stepX = graphW / (data.length - 1);
+    const stepX = graphW / (values.length - 1);
 
-    // Gradient fill
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, 'rgba(0, 245, 212, 0.15)');
-    grad.addColorStop(0.5, 'rgba(0, 245, 212, 0.02)');
-    grad.addColorStop(1, 'rgba(247, 37, 133, 0.15)');
-
-    // Fill area
+    // Area fill under curve
     ctx.beginPath();
-    ctx.moveTo(padding, zeroY - data[0] * (h * 0.4));
-    for (let i = 1; i < data.length; i++) {
-        const x = padding + i * stepX;
-        const y = zeroY - data[i] * (h * 0.4);
-        const prevX = padding + (i - 1) * stepX;
-        const prevY = zeroY - data[i - 1] * (h * 0.4);
+    ctx.moveTo(leftPad, zeroY - values[0] * (graphH / 2));
+    for (let i = 1; i < values.length; i++) {
+        const x = leftPad + i * stepX;
+        const y = zeroY - values[i] * (graphH / 2);
+        const prevX = leftPad + (i - 1) * stepX;
+        const prevY = zeroY - values[i - 1] * (graphH / 2);
         ctx.bezierCurveTo((prevX + x) / 2, prevY, (prevX + x) / 2, y, x, y);
     }
-    ctx.lineTo(padding + (data.length - 1) * stepX, h);
-    ctx.lineTo(padding, h);
+    ctx.lineTo(leftPad + (values.length - 1) * stepX, zeroY);
+    ctx.lineTo(leftPad, zeroY);
     ctx.closePath();
-    ctx.fillStyle = grad;
+    const areaGrad = ctx.createLinearGradient(0, topPad, 0, topPad + graphH);
+    areaGrad.addColorStop(0, 'rgba(0, 245, 212, 0.2)');
+    areaGrad.addColorStop(0.5, 'rgba(0, 245, 212, 0.02)');
+    areaGrad.addColorStop(1, 'rgba(247, 37, 133, 0.15)');
+    ctx.fillStyle = areaGrad;
     ctx.fill();
 
-    // Line
+    // Main line
     ctx.beginPath();
-    ctx.moveTo(padding, zeroY - data[0] * (h * 0.4));
-    for (let i = 1; i < data.length; i++) {
-        const x = padding + i * stepX;
-        const y = zeroY - data[i] * (h * 0.4);
-        const prevX = padding + (i - 1) * stepX;
-        const prevY = zeroY - data[i - 1] * (h * 0.4);
+    ctx.moveTo(leftPad, zeroY - values[0] * (graphH / 2));
+    for (let i = 1; i < values.length; i++) {
+        const x = leftPad + i * stepX;
+        const y = zeroY - values[i] * (graphH / 2);
+        const prevX = leftPad + (i - 1) * stepX;
+        const prevY = zeroY - values[i - 1] * (graphH / 2);
         ctx.bezierCurveTo((prevX + x) / 2, prevY, (prevX + x) / 2, y, x, y);
     }
-    ctx.strokeStyle = 'rgba(0, 245, 212, 0.8)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(0, 245, 212, 0.9)';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // Dots
-    for (let i = 0; i < data.length; i++) {
-        const x = padding + i * stepX;
-        const y = zeroY - data[i] * (h * 0.4);
+    // Data points with turn labels
+    ctx.textAlign = 'center';
+    for (let i = 0; i < values.length; i++) {
+        const x = leftPad + i * stepX;
+        const y = zeroY - values[i] * (graphH / 2);
+        const val = values[i];
+
+        // Dot color based on sentiment
+        let dotColor = '#f59e0b'; // neutral
+        if (val > 0.2) dotColor = '#10b981'; // positive
+        if (val < -0.2) dotColor = '#f72585'; // negative
+
+        // Dot
         ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = data[i] < -0.5 ? '#f72585' : data[i] > 0.2 ? '#10b981' : '#00f5d4';
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = dotColor;
         ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Turn number below x-axis
+        ctx.font = '9px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillText(points[i].turn || (i + 1), x, topPad + graphH + 14);
+
+        // Speaker indicator
+        const speaker = points[i].speaker || '';
+        const isHost = speaker.toLowerCase().includes('host');
+        ctx.font = '7px Inter, sans-serif';
+        ctx.fillStyle = isHost ? 'rgba(139, 92, 246, 0.7)' : 'rgba(59, 130, 246, 0.7)';
+        ctx.fillText(isHost ? 'H' : 'C', x, topPad + graphH + 25);
+
+        // Summary tooltip (only show for key points - every other or when space allows)
+        const summary = points[i].summary || '';
+        if (summary && (values.length <= 6 || i % 2 === 0)) {
+            ctx.font = '8px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            const labelY = val >= 0 ? y + 16 : y - 10;
+            const maxChars = Math.floor(stepX / 4.5);
+            const truncated = summary.length > maxChars ? summary.substring(0, maxChars) + '..' : summary;
+            ctx.fillText(truncated, x, labelY);
+        }
     }
 
+    // X-axis label
+    ctx.font = '9px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.textAlign = 'center';
+    ctx.fillText('Turn #', leftPad + graphW / 2, topPad + graphH + 40);
+    ctx.fillText('(H = Host, C = Customer)', leftPad + graphW / 2, topPad + graphH + 50);
+
     // Anger marker (lowest point)
-    const minVal = Math.min(...data);
+    const minVal = Math.min(...values);
     if (minVal < -0.3) {
-        const angerIdx = data.indexOf(minVal);
-        const ax = padding + angerIdx * stepX;
-        const ay = zeroY - data[angerIdx] * (h * 0.4);
+        const angerIdx = values.indexOf(minVal);
+        const ax = leftPad + angerIdx * stepX;
+        const ay = zeroY - values[angerIdx] * (graphH / 2);
         ctx.beginPath();
-        ctx.arc(ax, ay, 7, 0, Math.PI * 2);
+        ctx.arc(ax, ay, 9, 0, Math.PI * 2);
         ctx.strokeStyle = '#f72585';
         ctx.lineWidth = 2;
         ctx.stroke();
-        ctx.font = '9px Space Grotesk, sans-serif';
+        ctx.font = 'bold 9px Space Grotesk, sans-serif';
         ctx.fillStyle = '#f72585';
-        ctx.fillText('⚡ Anger', ax - 15, ay - 12);
+        ctx.textAlign = 'center';
+        ctx.fillText('Peak Negativity', ax, ay - 14);
     }
 }
 
