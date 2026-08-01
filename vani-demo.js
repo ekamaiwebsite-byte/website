@@ -356,8 +356,6 @@ function formatDiarizedTranscript(turns) {
         </div>`;
     }).join('');
 }
-    }).join('');
-}
 
 function colorSentiment(id, value) {
     const el = document.getElementById(id);
