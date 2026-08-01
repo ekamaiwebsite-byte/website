@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
     });
 
     const hfResponse = await makeRequest(
-      `https://api-inference.huggingface.co/models/${LLM_MODEL}`,
+      `https://router.huggingface.co/hf-inference/models/${LLM_MODEL}`,
       {
         method: 'POST',
         headers: {

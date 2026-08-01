@@ -27,7 +27,7 @@ module.exports = async function handler(req, res) {
 
     // Call HuggingFace API using https module
     const hfResponse = await makeRequest(
-      `https://api-inference.huggingface.co/models/${WHISPER_MODEL}`,
+      `https://router.huggingface.co/hf-inference/models/${WHISPER_MODEL}`,
       {
         method: 'POST',
         headers: {
