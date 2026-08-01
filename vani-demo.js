@@ -456,11 +456,12 @@ function formatDiarizedTranscript(turns) {
     return turns.map((turn, i) => {
         const text = turn.text || '';
         const speaker = turn.speaker || '';
-        // Check if this is Speaker 1 (first speaker)
         const isFirstSpeaker = speaker === 'Speaker 1' || speaker === 'Speaker A' || speaker === 'A';
         const bgClass = isFirstSpeaker ? 'turn-host' : 'turn-customer';
+        const speakerLabel = isFirstSpeaker ? 'Speaker 1' : 'Speaker 2';
         return `<div class="turn diarized-turn ${bgClass}">
             <span class="turn-number">${i + 1}</span>
+            <span class="speaker-label">${speakerLabel}:</span>
             <span class="turn-text">${text}</span>
         </div>`;
     }).join('');
