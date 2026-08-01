@@ -32,6 +32,7 @@ module.exports = async function handler(req, res) {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${HF_TOKEN}`,
+          'Content-Type': 'audio/wav',
           'Content-Length': audioBuffer.length,
         },
         body: audioBuffer,
