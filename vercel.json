@@ -1,4 +1,24 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/Vani-Demo", "destination": "/vani-demo", "permanent": true },
+    { "source": "/VANI-DEMO", "destination": "/vani-demo", "permanent": true },
+    { "source": "/Vani-AI", "destination": "/vani-ai", "permanent": true },
+    { "source": "/VANI-AI", "destination": "/vani-ai", "permanent": true },
+    { "source": "/Contact", "destination": "/contact", "permanent": true },
+    { "source": "/CONTACT", "destination": "/contact", "permanent": true },
+    { "source": "/Services", "destination": "/services", "permanent": true },
+    { "source": "/SERVICES", "destination": "/services", "permanent": true },
+    { "source": "/Careers", "destination": "/careers", "permanent": true },
+    { "source": "/CAREERS", "destination": "/careers", "permanent": true },
+    { "source": "/Cosmo-Soil", "destination": "/cosmo-soil", "permanent": true },
+    { "source": "/COSMO-SOIL", "destination": "/cosmo-soil", "permanent": true },
+    { "source": "/Svasya-AI", "destination": "/svasya-ai", "permanent": true },
+    { "source": "/SVASYA-AI", "destination": "/svasya-ai", "permanent": true },
+    { "source": "/Retail", "destination": "/retail", "permanent": true },
+    { "source": "/RETAIL", "destination": "/retail", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/api/transcribe", "destination": "/api/transcribe" },
     { "source": "/api/analyze", "destination": "/api/analyze" }
