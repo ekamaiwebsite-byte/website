@@ -26,9 +26,10 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Missing "inputs" in request body' });
     }
 
-    // Use OpenAI-compatible chat completions API via HuggingFace router
+    // Use HuggingFace router with OpenAI-compatible chat completions API
+    // Model format: "model_id:provider"
     const payload = JSON.stringify({
-      model: 'Qwen/Qwen2.5-7B-Instruct-1M',
+      model: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B',
       messages: [
         { role: 'user', content: inputs }
       ],
@@ -37,7 +38,7 @@ module.exports = async function handler(req, res) {
     });
 
     const hfResponse = await makeRequest(
-      'https://router.huggingface.co/novita/v3/openai/chat/completions',
+      'https://router.huggingface.co/v1/chat/completions',
       {
         method: 'POST',
         headers: {
@@ -52,7 +53,7 @@ module.exports = async function handler(req, res) {
     const data = JSON.parse(hfResponse.body);
 
     if (hfResponse.statusCode !== 200) {
-      return res.status(hfResponse.statusCode).json({ error: data.error || hfResponse.body });
+      return res.status(hfResponse.statusCode).json({ error: data.error || JSON.stringify(data) });
     }
 
     // Convert chat completions response to the format our frontend expects
