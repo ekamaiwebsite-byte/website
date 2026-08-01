@@ -19,8 +19,6 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'HF_TOKEN environment variable not configured' });
   }
 
-  const LLM_MODEL = 'mistralai/Mistral-7B-Instruct-v0.3';
-
   try {
     const { inputs, parameters } = req.body;
 
@@ -28,13 +26,18 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Missing "inputs" in request body' });
     }
 
+    // Use OpenAI-compatible chat completions API via HuggingFace router
     const payload = JSON.stringify({
-      inputs,
-      parameters: parameters || { max_new_tokens: 1500, temperature: 0.1, return_full_text: false },
+      model: 'Qwen/Qwen2.5-7B-Instruct-1M',
+      messages: [
+        { role: 'user', content: inputs }
+      ],
+      max_tokens: (parameters && parameters.max_new_tokens) || 1500,
+      temperature: (parameters && parameters.temperature) || 0.1,
     });
 
     const hfResponse = await makeRequest(
-      `https://router.huggingface.co/hf-inference/models/${LLM_MODEL}`,
+      'https://router.huggingface.co/novita/v3/openai/chat/completions',
       {
         method: 'POST',
         headers: {
@@ -46,7 +49,19 @@ module.exports = async function handler(req, res) {
       }
     );
 
-    return res.status(hfResponse.statusCode).json(JSON.parse(hfResponse.body));
+    const data = JSON.parse(hfResponse.body);
+
+    if (hfResponse.statusCode !== 200) {
+      return res.status(hfResponse.statusCode).json({ error: data.error || hfResponse.body });
+    }
+
+    // Convert chat completions response to the format our frontend expects
+    let generatedText = '';
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      generatedText = data.choices[0].message.content || '';
+    }
+
+    return res.status(200).json([{ generated_text: generatedText }]);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

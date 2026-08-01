@@ -102,11 +102,11 @@ async function transcribeAudio(file) {
 }
 
 
-// ===== STEP 2: TEXT → LLM ANALYSIS (Mistral via serverless proxy) =====
+// ===== STEP 2: TEXT → LLM ANALYSIS (via serverless proxy) =====
 async function analyzeSentiment(transcript) {
-    updateProcessing('Running sentiment analysis (Mistral LLM)...');
+    updateProcessing('Running sentiment analysis (LLM)...');
 
-    const analysisPrompt = '<s>[INST] You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nRequired JSON fields:\n- "duration_estimate": estimated call duration in "MM:SS" format\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of numbers from -1.0 to 1.0 for each conversation turn (customer perspective)\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object: [/INST]';
+    const analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nRequired JSON fields:\n- "duration_estimate": estimated call duration in "MM:SS" format\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of numbers from -1.0 to 1.0 for each conversation turn (customer perspective)\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
 
     let response;
     try {
