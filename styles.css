@@ -161,7 +161,7 @@ body { font-family: var(--font-body); background: var(--bg-primary); color: var(
 .step-content p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
 
 /* ===== PRODUCTS ===== */
-.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem; }
+.products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
 .product-card { position: relative; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.5rem; overflow: hidden; transition: var(--transition); }
 .product-card:hover { border-color: rgba(0,245,212,0.3); transform: translateY(-5px); }
 .product-glow { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,245,212,0.03) 0%, transparent 50%); opacity: 0; transition: opacity 0.5s; pointer-events: none; }
