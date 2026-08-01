@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekam-AI | Data Chaos Becomes Business Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link active">Home</a>
+                <a href="cosmo-soil.html" class="nav-link">Cosmo-Soil</a>
+                <a href="svasya-ai.html" class="nav-link">Svasya-AI</a>
+                <a href="retail.html" class="nav-link">Retail</a>
+                <a href="vani-ai.html" class="nav-link">Vani-AI</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="careers.html" class="nav-link">Careers</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-bg-grid"></div>
+        <div class="hero-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge animate-on-scroll">
+                <span class="badge-dot"></span>
+                <span>Pioneering AI Solutions Since 2022</span>
+            </div>
+            <h1 class="hero-title animate-on-scroll">
+                <span class="title-line">Data Chaos Becomes</span>
+                <span class="title-line gradient-text">Business Solutions</span>
+                <span class="title-line">With <span class="brand-highlight">EKAM-AI</span></span>
+            </h1>
+            <p class="hero-subtitle animate-on-scroll">
+                A dynamic startup leveraging cutting-edge machine learning algorithms to launch groundbreaking B2B and B2C products. Empowering our clients with the power of artificial intelligence to drive success and growth.
+            </p>
+            <div class="hero-cta animate-on-scroll">
+                <a href="services.html" class="btn-primary">
+                    <span>Explore Services</span>
+                    <div class="btn-glow"></div>
+                </a>
+                <a href="contact.html" class="btn-secondary">
+                    <span>Get In Touch</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="hero-stats animate-on-scroll">
+                <div class="stat-item">
+                    <div class="stat-num-row"><span class="stat-number" data-target="2">0</span><span class="stat-plus">+</span></div>
+                    <span class="stat-label">AI Products Live</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-num-row"><span class="stat-number" data-target="5">0</span></div>
+                    <span class="stat-label">Stage Data Pipeline</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-text">B2B & B2C</span>
+                    <span class="stat-label">Markets Served</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual animate-on-scroll">
+            <div class="neural-network">
+                <canvas id="neuralCanvas"></canvas>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+            <span>Scroll to explore</span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section about-section" id="about">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">WHO WE ARE</span>
+                <h2 class="section-title">Data Science & <span class="gradient-text">GenAI Pioneers</span></h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-content animate-on-scroll">
+                    <p class="about-text lead">We don't just analyze data — we transform it into your most powerful competitive advantage.</p>
+                    <p class="about-text">Our firm belief in Data Science as a catalyst for business improvement drives us to offer expertise in product development, services, and consulting. Whether you seek data-driven solutions or technological assistance, our team is equipped to help you achieve your business goals.</p>
+                    <p class="about-text">With a wide range of skills and a passion for innovation, we tailor our offerings to suit your specific needs, regardless of your industry.</p>
+                    <div class="about-capabilities">
+                        <div class="capability-card">
+                            <div class="capability-icon"><i class="fas fa-brain"></i></div>
+                            <h4>Generative AI</h4>
+                            <p>LLMs, Copilots, NLP</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="capability-icon"><i class="fas fa-chart-line"></i></div>
+                            <h4>ML Engineering</h4>
+                            <p>Predictive Models, MLOps</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="capability-icon"><i class="fas fa-database"></i></div>
+                            <h4>Data Platforms</h4>
+                            <p>Lakehouse, Pipelines</p>
+                        </div>
+                        <div class="capability-card">
+                            <div class="capability-icon"><i class="fas fa-chart-pie"></i></div>
+                            <h4>Analytics</h4>
+                            <p>BI, Dashboards, Insights</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-visual animate-on-scroll">
+                    <div class="rotating-ring">
+                        <div class="ring ring-1"></div>
+                        <div class="ring ring-2"></div>
+                        <div class="ring ring-3"></div>
+                        <div class="ring-center"><i class="fas fa-atom"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="section process-section" id="process">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">OUR PROCESS</span>
+                <h2 class="section-title">How Do We <span class="gradient-text">Function?</span></h2>
+                <p class="section-subtitle">We accelerate your journey from raw data to intelligent decisions through a proven 5-stage pipeline.</p>
+            </div>
+            <div class="pipeline">
+                <div class="pipeline-line"><div class="pipeline-progress" id="pipelineProgress"></div></div>
+                <div class="pipeline-steps">
+                    <div class="pipeline-step animate-on-scroll" data-step="1">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-layer-group"></i></div></div>
+                        <div class="step-content"><h3>1. Data Collection</h3><p>We start by gathering and structuring raw data from multiple sources — transactional systems, APIs, IoT sensors, and third-party feeds — into a unified data lake.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="2">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-cogs"></i></div></div>
+                        <div class="step-content"><h3>2. Data Engineering</h3><p>Our engineers build robust, scalable pipelines that clean, transform, and enrich your data — making it model-ready and eliminating silos across your organization.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="3">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-flask"></i></div></div>
+                        <div class="step-content"><h3>3. Data Science</h3><p>We apply advanced ML models, predictive analytics, and statistical methods to uncover hidden patterns, forecast trends, and generate actionable intelligence.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="4">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-chart-bar"></i></div></div>
+                        <div class="step-content"><h3>4. Data Visualization</h3><p>Complex insights are translated into intuitive dashboards, interactive reports, and visual stories that every stakeholder can understand and act upon.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="5">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-rocket"></i></div></div>
+                        <div class="step-content"><h3>5. Decision Making</h3><p>The final output: confident, data-backed strategy decisions that drive revenue growth, reduce costs, and create lasting competitive advantages.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="section products-section" id="products">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">OUR PRODUCTS</span>
+                <h2 class="section-title">Transformative <span class="gradient-text">AI Products</span></h2>
+                <p class="section-subtitle">AI-powered solutions designed for real-world impact across healthcare, real estate, and retail.</p>
+            </div>
+            <div class="products-grid">
+                <div class="product-card animate-on-scroll">
+                    <div class="product-glow"></div>
+                    <div class="product-header">
+                        <img src="images/cosmosoil logo.jpg" alt="Cosmo Soil" class="product-logo-img">
+                        <h3 class="product-name">COSMO SOIL</h3>
+                        <span class="product-badge">Real Estate</span>
+                    </div>
+                    <h4 class="product-tagline">Smart Real Estate Research Platform</h4>
+                    <p class="product-description">A free-to-use research application designed to help investors identify suitable locations for investing in the right real estate.</p>
+                    <ul class="product-features">
+                        <li><i class="fas fa-check-circle"></i>AI-powered locality analysis & property search</li>
+                        <li><i class="fas fa-check-circle"></i>Post listings or browse properties matching your criteria</li>
+                        <li><i class="fas fa-check-circle"></i>EMI calculators, pincode finders, and area converters</li>
+                        <li><i class="fas fa-check-circle"></i>Newsletters and year-on-year market analysis</li>
+                    </ul>
+                    <a href="cosmo-soil.html" class="product-cta"><span>Learn More</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="product-card animate-on-scroll">
+                    <div class="product-glow"></div>
+                    <div class="product-header">
+                        <img src="images/savsya ai logo.png" alt="Svasya-AI" class="product-logo-img">
+                        <h3 class="product-name">SVASYA-AI</h3>
+                        <span class="product-badge">Healthcare</span>
+                    </div>
+                    <h4 class="product-tagline">AI-Powered Healthcare Intelligence</h4>
+                    <p class="product-description">Revolutionizing healthcare by allowing hospitals to convert complex medical data into valuable life-saving insights.</p>
+                    <ul class="product-features">
+                        <li><i class="fas fa-check-circle"></i>Advanced predictive analytics for early diagnosis</li>
+                        <li><i class="fas fa-check-circle"></i>Convert complex medical data into actionable insights</li>
+                        <li><i class="fas fa-check-circle"></i>Faster, more accurate clinical decision making</li>
+                        <li><i class="fas fa-check-circle"></i>Scalable platform for hospitals and clinics</li>
+                    </ul>
+                    <a href="svasya-ai.html" class="product-cta"><span>Explore More</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="product-card animate-on-scroll">
+                    <div class="product-glow"></div>
+                    <div class="product-header">
+                        <div class="product-logo retail-logo"><i class="fas fa-store"></i></div>
+                        <h3 class="product-name">RETAIL AI</h3>
+                        <span class="product-badge">Retail</span>
+                    </div>
+                    <h4 class="product-tagline">Retail Capabilities - 25 High-Impact Plays</h4>
+                    <p class="product-description">Consulting frameworks + Data Science models to help you grow customers, sales and margin. Built on retail & shopper data.</p>
+                    <ul class="product-features">
+                        <li><i class="fas fa-check-circle"></i>Customer & Loyalty intelligence</li>
+                        <li><i class="fas fa-check-circle"></i>Pricing & Promotions optimization</li>
+                        <li><i class="fas fa-check-circle"></i>Supply Chain & Operations forecasting</li>
+                        <li><i class="fas fa-check-circle"></i>GenAI Insights Copilot for Merchants</li>
+                    </ul>
+                    <a href="retail.html" class="product-cta"><span>View All 25 Plays</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="product-card animate-on-scroll">
+                    <div class="product-glow"></div>
+                    <div class="product-header">
+                        <div class="product-logo vani-logo"><i class="fas fa-phone-volume"></i></div>
+                        <h3 class="product-name">VANI-AI</h3>
+                        <span class="product-badge">Telecalling</span>
+                    </div>
+                    <h4 class="product-tagline">Telecall Sentiment Intelligence Platform</h4>
+                    <p class="product-description">AI-powered analysis of call recordings — multilingual transcription, sentiment tracking, anger triggers, issue detection, and resolution scoring using open-source LLMs.</p>
+                    <ul class="product-features">
+                        <li><i class="fas fa-check-circle"></i>Multilingual audio-to-text (Telugu, Hindi, English & more)</li>
+                        <li><i class="fas fa-check-circle"></i>Real-time customer & host sentiment scoring</li>
+                        <li><i class="fas fa-check-circle"></i>Anger trigger detection with timestamp markers</li>
+                        <li><i class="fas fa-check-circle"></i>Issue identification & resolution tracking</li>
+                    </ul>
+                    <a href="vani-ai.html" class="product-cta"><span>Explore Platform</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section cta-section" id="cta">
+        <div class="cta-bg-effects">
+            <div class="cta-orb cta-orb-1"></div>
+            <div class="cta-orb cta-orb-2"></div>
+        </div>
+        <div class="section-container">
+            <div class="cta-content animate-on-scroll">
+                <h2 class="cta-title">Ready to Transform Your <span class="gradient-text">Data Into Decisions?</span></h2>
+                <p class="cta-text">Partner with EKAM AI to build proprietary machine learning infrastructure and transform your enterprise data into a dominant market asset.</p>
+                <div class="cta-actions">
+                    <a href="contact.html" class="btn-primary btn-large"><span>Contact Us</span><div class="btn-glow"></div></a>
+                    <a href="careers.html" class="btn-secondary"><span>Join Our Team</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <a href="index.html" class="nav-logo">
+                        <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                        <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+                    </a>
+                    <p>Empowering businesses with AI-driven solutions for a data-intelligent future.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <h4>Products</h4>
+                        <a href="cosmo-soil.html">Cosmo-Soil</a>
+                        <a href="svasya-ai.html">Svasya-AI</a>
+                        <a href="retail.html">Retail</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Company</h4>
+                        <a href="services.html">Services</a>
+                        <a href="careers.html">Careers</a>
+                        <a href="contact.html">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>COPYRIGHT &copy; 2024 EKAM AI - ALL RIGHTS RESERVED.</p>
+                <div class="footer-socials">
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

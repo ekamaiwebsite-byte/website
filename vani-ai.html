@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vani-AI - Telecall Sentiment Intelligence | Ekam-AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="cosmo-soil.html" class="nav-link">Cosmo-Soil</a>
+                <a href="svasya-ai.html" class="nav-link">Svasya-AI</a>
+                <a href="retail.html" class="nav-link">Retail</a>
+                <a href="vani-ai.html" class="nav-link active">Vani-AI</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="careers.html" class="nav-link">Careers</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="page-hero vani-hero">
+        <div class="page-hero-bg"></div>
+        <div class="page-hero-content animate-on-scroll">
+            <div class="page-hero-icon vani-color"><i class="fas fa-phone-volume"></i></div>
+            <h1 class="page-hero-title">VANI<span class="gradient-text">-AI</span></h1>
+            <p class="page-hero-subtitle">Telecall Sentiment Intelligence Platform</p>
+            <p class="page-hero-desc">Transform every customer call into actionable intelligence. Multilingual transcription, emotion mapping, issue detection, and resolution scoring — powered entirely by open-source LLMs.</p>
+            <a href="vani-demo.html" class="btn-primary btn-large"><span><i class="fas fa-play-circle"></i> &nbsp;Try Live Demo</span><div class="btn-glow"></div></a>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">HOW IT WORKS</span>
+                <h2 class="section-title">From Raw Audio to <span class="gradient-text">Actionable Insights</span></h2>
+                <p class="section-subtitle">Upload a call recording or transcript — Vani-AI handles the rest in seconds.</p>
+            </div>
+            <div class="pipeline">
+                <div class="pipeline-line"><div class="pipeline-progress" id="pipelineProgress"></div></div>
+                <div class="pipeline-steps">
+                    <div class="pipeline-step animate-on-scroll" data-step="1">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-microphone"></i></div></div>
+                        <div class="step-content"><h3>1. Audio Ingestion</h3><p>Upload call recordings in any format (MP3, WAV, M4A). Supports Telugu, Hindi, English, Tamil, Kannada, and more. If you already have a transcript, skip directly to analysis.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="2">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-language"></i></div></div>
+                        <div class="step-content"><h3>2. Speech-to-Text (Whisper)</h3><p>Multilingual transcription using OpenAI Whisper (open-source). Converts audio into timestamped, speaker-diarized transcripts with 95%+ accuracy across Indian languages.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="3">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-brain"></i></div></div>
+                        <div class="step-content"><h3>3. LLM Analysis</h3><p>Open-source LLMs (LLaMA/Mistral) analyze the transcript for sentiment, emotion spikes, anger triggers, key issues raised, and whether the agent resolved the problem.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="4">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-chart-line"></i></div></div>
+                        <div class="step-content"><h3>4. Sentiment Scoring</h3><p>Generates per-turn sentiment scores, overall customer mood trajectory, host performance rating, and pinpoints the exact moment frustration was triggered.</p></div>
+                    </div>
+                    <div class="pipeline-step animate-on-scroll" data-step="5">
+                        <div class="step-node"><div class="step-pulse"></div><div class="step-icon"><i class="fas fa-tachometer-alt"></i></div></div>
+                        <div class="step-content"><h3>5. Dashboard & Insights</h3><p>Visual dashboard with call duration, sentiment timeline, anger markers, issue summary, resolution status, and customer + host ratings — all in one view.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="section" style="background: var(--bg-secondary);">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">INTELLIGENCE OUTPUT</span>
+                <h2 class="section-title">What You <span class="gradient-text">Get</span></h2>
+            </div>
+            <div class="metrics-grid animate-on-scroll">
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                    <h4>Call Duration</h4>
+                    <p>Total call length with breakdowns for customer talk-time vs. host talk-time.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-smile"></i></div>
+                    <h4>Customer Sentiment</h4>
+                    <p>Overall emotion score — positive, neutral, or negative — with turn-by-turn tracking.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-headset"></i></div>
+                    <h4>Host Sentiment</h4>
+                    <p>Agent tone analysis — professionalism, empathy, patience scored throughout the call.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-fire-alt"></i></div>
+                    <h4>Anger Trigger Point</h4>
+                    <p>Exact timestamp where customer frustration spiked, with context of what caused it.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h4>Issue Detection</h4>
+                    <p>Primary issue the customer raised, categorized and summarized automatically.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-check-double"></i></div>
+                    <h4>Resolution Status</h4>
+                    <p>Did the host resolve the issue? Yes/No/Partial — with reasoning extracted from context.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-star"></i></div>
+                    <h4>Customer Rating</h4>
+                    <p>AI-predicted customer satisfaction score (1-10) based on conversation flow.</p>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon"><i class="fas fa-user-tie"></i></div>
+                    <h4>Host Rating</h4>
+                    <p>Agent performance score (1-10) evaluating communication, empathy, and problem-solving.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="section">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">OPEN-SOURCE STACK</span>
+                <h2 class="section-title">Built on <span class="gradient-text">Open-Source LLMs</span></h2>
+            </div>
+            <div class="three-col-grid animate-on-scroll">
+                <div class="feature-block">
+                    <div class="feature-icon"><i class="fas fa-microphone-alt"></i></div>
+                    <h3>Whisper (OpenAI)</h3>
+                    <p>State-of-the-art multilingual speech recognition. Handles Telugu, Hindi, English, Tamil, and 90+ languages with speaker diarization.</p>
+                </div>
+                <div class="feature-block">
+                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                    <h3>LLaMA / Mistral</h3>
+                    <p>Open-weight LLMs for sentiment classification, emotion detection, issue extraction, and resolution assessment. Runs locally — no data leaves your infra.</p>
+                </div>
+                <div class="feature-block">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Privacy-First</h3>
+                    <p>100% on-premise capable. No call data sent to external APIs. Complete control over sensitive customer conversations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section cta-section">
+        <div class="cta-bg-effects"><div class="cta-orb cta-orb-1"></div><div class="cta-orb cta-orb-2"></div></div>
+        <div class="section-container">
+            <div class="cta-content animate-on-scroll">
+                <h2 class="cta-title">Ready to Understand Every <span class="gradient-text">Customer Call?</span></h2>
+                <p class="cta-text">Upload an audio file or transcript and see Vani-AI in action.</p>
+                <a href="vani-demo.html" class="btn-primary btn-large"><span><i class="fas fa-play-circle"></i> &nbsp;Launch Demo</span><div class="btn-glow"></div></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p>COPYRIGHT &copy; 2024 EKAM AI - ALL RIGHTS RESERVED.</p>
+                <div class="footer-nav-links">
+                    <a href="index.html">Home</a><a href="cosmo-soil.html">Cosmo-Soil</a><a href="svasya-ai.html">Svasya-AI</a><a href="retail.html">Retail</a><a href="vani-ai.html">Vani-AI</a><a href="services.html">Services</a><a href="careers.html">Careers</a><a href="contact.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

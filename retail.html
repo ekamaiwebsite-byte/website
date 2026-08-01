@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail AI Capabilities | Ekam-AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="cosmo-soil.html" class="nav-link">Cosmo-Soil</a>
+                <a href="svasya-ai.html" class="nav-link">Svasya-AI</a>
+                <a href="retail.html" class="nav-link active">Retail</a>
+                <a href="vani-ai.html" class="nav-link">Vani-AI</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="careers.html" class="nav-link">Careers</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <section class="page-hero">
+        <div class="page-hero-bg"></div>
+        <div class="page-hero-content animate-on-scroll">
+            <div class="page-hero-icon retail-color"><i class="fas fa-store"></i></div>
+            <h1 class="page-hero-title">RETAIL <span class="gradient-text">CAPABILITIES</span></h1>
+            <p class="page-hero-subtitle">Our Services - Top 25 High-Impact Plays</p>
+            <p class="page-hero-desc">Consulting frameworks + Data Science models we offer to help you grow customers, sales and margin. Explore our curated service portfolio - Built on retail & shopper data.</p>
+        </div>
+    </section>
+
+    <!-- Service Areas Overview -->
+    <section class="section">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <h2 class="section-title">Our Service Areas - <span class="gradient-text">6 Themes - 25 Capabilities</span></h2>
+            </div>
+            <div class="retail-themes-grid animate-on-scroll">
+                <div class="theme-card theme-teal"><h4>Customer & Loyalty</h4><p>Know every shopper. Earn every visit.</p><span>5 services</span></div>
+                <div class="theme-card theme-cyan"><h4>Pricing & Promotions</h4><p>Confident pricing. Clean promo P&L.</p><span>5 services</span></div>
+                <div class="theme-card theme-coral"><h4>Assortment, Range & Space</h4><p>The right products, in the right place.</p><span>4 services</span></div>
+                <div class="theme-card theme-purple"><h4>Marketing, Media & Measurement</h4><p>Spend less. Sell more. Prove it.</p><span>3 services</span></div>
+                <div class="theme-card theme-green"><h4>Supply Chain & Operations</h4><p>Forecast better. Stock smarter.</p><span>3 services</span></div>
+                <div class="theme-card theme-gold"><h4>Category, Supplier & Frontier</h4><p>Strategy, partnership and what's next.</p><span>5 services</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer & Loyalty -->
+    <section class="section" style="background: var(--bg-secondary);">
+        <div class="section-container">
+            <div class="retail-theme-header teal-accent animate-on-scroll">
+                <h2>Customer & Loyalty</h2>
+                <p>Know every shopper. Earn every visit. — 5 services</p>
+            </div>
+            <div class="retail-services-list animate-on-scroll">
+                <div class="retail-service-item"><span class="service-num">01</span><div><h4>Customer Segmentation & Lifestage Personas</h4><p>Behavioural and needstate segmentation built on basket, visit and engagement signals.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">02</span><div><h4>Customer Lifetime Value (CLV) Modelling</h4><p>Probabilistic CLV models that predict 12-36 month value using frequency, recency, basket and engagement features.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">03</span><div><h4>Churn Prediction & Win-back</h4><p>Early-warning models flag at-risk shoppers 4-12 weeks before lapse, paired with tested win-back journeys.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">04</span><div><h4>Loyalty Programme Design & Optimization</h4><p>End-to-end loyalty design covering value proposition, tiering, earn-burn economics, partner ecosystem.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">05</span><div><h4>Personalized Offers & Next-Best-Action</h4><p>ML-ranked offer engine that selects the right product, discount and channel for each shopper.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing & Promotions -->
+    <section class="section">
+        <div class="section-container">
+            <div class="retail-theme-header cyan-accent animate-on-scroll">
+                <h2>Pricing & Promotions</h2>
+                <p>Confident pricing. Clean promo P&L. — 5 services</p>
+            </div>
+            <div class="retail-services-list animate-on-scroll">
+                <div class="retail-service-item"><span class="service-num">06</span><div><h4>Price Elasticity & Cross-Elasticity</h4><p>SKU-level own and cross elasticities estimated from transaction data, including substitution and halo effects.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">07</span><div><h4>Promotion Effectiveness & ROI</h4><p>Baseline-vs-uplift decomposition of every promotion to separate incremental sales from cannibalisation.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">08</span><div><h4>Markdown & Clearance Optimization</h4><p>Dynamic markdown engine that times depth and breadth of discounts against sell-through curves and residual value.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">09</span><div><h4>Competitor Price Intelligence</h4><p>Web-scraped, normalized competitor price feeds joined to internal SKU and KVI maps.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">10</span><div><h4>KVI-Led Price Architecture</h4><p>Strategic price architecture built around key-value items, key-value categories and price-role tiers.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Supply Chain -->
+    <section class="section" style="background: var(--bg-secondary);">
+        <div class="section-container">
+            <div class="retail-theme-header green-accent animate-on-scroll">
+                <h2>Supply Chain & Operations</h2>
+                <p>Forecast better. Stock smarter. — 3 services</p>
+            </div>
+            <div class="retail-services-list animate-on-scroll">
+                <div class="retail-service-item"><span class="service-num">18</span><div><h4>SKU/Store Demand Forecasting</h4><p>Hierarchical ML forecasts at SKU-store-day level, blending trend, seasonality, weather, events and promotional calendars.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">19</span><div><h4>Inventory & Replenishment Optimization</h4><p>Service-level-aware safety stock and reorder logic that balances availability, waste and cost.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">20</span><div><h4>Store Clustering & Format Strategy</h4><p>Behavioural and demographic clustering of stores to drive differentiated range, price, space and service propositions.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category & Frontier -->
+    <section class="section">
+        <div class="section-container">
+            <div class="retail-theme-header gold-accent animate-on-scroll">
+                <h2>Category, Supplier & Frontier</h2>
+                <p>Strategy, partnership and what's next. — 5 services</p>
+            </div>
+            <div class="retail-services-list animate-on-scroll">
+                <div class="retail-service-item"><span class="service-num">21</span><div><h4>Category Vision & Strategy (Consulting)</h4><p>End-to-end category strategy: role, drivers, shopper missions, range, price, promo and space.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">22</span><div><h4>Supplier Collaboration & Joint Business Planning</h4><p>Data-led JBP frameworks with shared KPIs, agreed scorecards, and analytics packs.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">23</span><div><h4>Shopper Mission & Trip Analytics</h4><p>Basket-level decomposition into trip missions (top-up, big shop, food-now, treat) with cross-mission migration.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">24</span><div><h4>Retail Media & Onsite Monetization</h4><p>Build of a retail media proposition: audience platform, onsite ad placements, measurement and supplier self-service.</p></div></div>
+                <div class="retail-service-item"><span class="service-num">25</span><div><h4>GenAI Insights Copilot for Merchants</h4><p>Natural-language copilot over trading, customer and supplier data so a buyer can ask what changed in my category.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p>COPYRIGHT &copy; 2024 EKAM AI - ALL RIGHTS RESERVED.</p>
+                <div class="footer-nav-links">
+                    <a href="index.html">Home</a><a href="cosmo-soil.html">Cosmo-Soil</a><a href="svasya-ai.html">Svasya-AI</a><a href="retail.html">Retail</a><a href="services.html">Services</a><a href="careers.html">Careers</a><a href="contact.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

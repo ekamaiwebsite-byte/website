@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers - Join Ekam-AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="cosmo-soil.html" class="nav-link">Cosmo-Soil</a>
+                <a href="svasya-ai.html" class="nav-link">Svasya-AI</a>
+                <a href="retail.html" class="nav-link">Retail</a>
+                <a href="vani-ai.html" class="nav-link">Vani-AI</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="careers.html" class="nav-link active">Careers</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <section class="page-hero">
+        <div class="page-hero-bg"></div>
+        <div class="page-hero-content animate-on-scroll">
+            <div class="page-hero-icon"><i class="fas fa-users"></i></div>
+            <h1 class="page-hero-title">WE'RE <span class="gradient-text">HIRING!</span></h1>
+            <p class="page-hero-subtitle">Shape the future of AI with us</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-container">
+            <div class="careers-layout animate-on-scroll">
+                <div class="careers-info">
+                    <h2>Join Our Team</h2>
+                    <blockquote class="careers-quote">
+                        "Join us at Ekam-AI company for a rewarding career that combines innovation, impact, and growth. As part of our dynamic team, you'll be at the forefront of pioneering AI-backed solutions, making a real difference in various industries. Embrace continuous learning and collaboration in our inclusive workplace, where your contributions are valued, and diverse perspectives are celebrated. With ample opportunities for career advancement, work-life balance, and a mission-driven focus on addressing global challenges, you'll find a fulfilling and meaningful journey at Ekam-AI company. Shape the future of AI with us and embark on a transformative career path."
+                    </blockquote>
+                </div>
+                <div class="careers-form">
+                    <h2>Apply Now</h2>
+                    <form class="application-form" id="applicationForm">
+                        <div class="form-group">
+                            <input type="text" placeholder="Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" placeholder="Phone" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Email*" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Message" rows="5"></textarea>
+                        </div>
+                        <div class="form-group file-upload">
+                            <label for="resume"><i class="fas fa-paperclip"></i> Attach Resume</label>
+                            <input type="file" id="resume" accept=".pdf,.doc,.docx">
+                            <span class="file-hint">Maximum 5MB</span>
+                        </div>
+                        <button type="submit" class="btn-primary btn-large" style="width:100%;justify-content:center;">
+                            <span>Submit Application</span>
+                            <div class="btn-glow"></div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p>COPYRIGHT &copy; 2024 EKAM AI - ALL RIGHTS RESERVED.</p>
+                <div class="footer-nav-links">
+                    <a href="index.html">Home</a><a href="cosmo-soil.html">Cosmo-Soil</a><a href="svasya-ai.html">Svasya-AI</a><a href="retail.html">Retail</a><a href="services.html">Services</a><a href="careers.html">Careers</a><a href="contact.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

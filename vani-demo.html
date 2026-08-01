@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vani-AI Demo - Call Sentiment Analysis | Ekam-AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="vani-demo.css">
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="vani-ai.html" class="nav-link">Vani-AI</a>
+                <a href="vani-demo.html" class="nav-link active">Demo</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <main class="demo-layout">
+        <!-- LEFT: Dashboard -->
+        <div class="demo-dashboard" id="dashboard">
+            <div class="dash-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Call Intelligence Dashboard</h1>
+                <p class="dash-subtitle">Upload an audio file or transcript to analyze</p>
+            </div>
+
+            <!-- Placeholder state -->
+            <div class="dash-placeholder" id="dashPlaceholder">
+                <div class="placeholder-icon"><i class="fas fa-wave-square"></i></div>
+                <h3>No Analysis Yet</h3>
+                <p>Upload a call recording or transcript file from the panel on the right to see the sentiment analysis dashboard.</p>
+            </div>
+
+            <!-- Results (hidden until analysis) -->
+            <div class="dash-results" id="dashResults" style="display:none;">
+                <!-- Top Metrics Row -->
+                <div class="dash-metrics-row">
+                    <div class="dash-metric">
+                        <div class="dash-metric-icon"><i class="fas fa-clock"></i></div>
+                        <div class="dash-metric-data">
+                            <span class="dash-metric-value" id="metricDuration">--:--</span>
+                            <span class="dash-metric-label">Call Duration</span>
+                        </div>
+                    </div>
+                    <div class="dash-metric">
+                        <div class="dash-metric-icon cust-icon"><i class="fas fa-user"></i></div>
+                        <div class="dash-metric-data">
+                            <span class="dash-metric-value" id="metricCustSentiment">--</span>
+                            <span class="dash-metric-label">Customer Sentiment</span>
+                        </div>
+                    </div>
+                    <div class="dash-metric">
+                        <div class="dash-metric-icon host-icon"><i class="fas fa-headset"></i></div>
+                        <div class="dash-metric-data">
+                            <span class="dash-metric-value" id="metricHostSentiment">--</span>
+                            <span class="dash-metric-label">Host Sentiment</span>
+                        </div>
+                    </div>
+                    <div class="dash-metric">
+                        <div class="dash-metric-icon resolve-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="dash-metric-data">
+                            <span class="dash-metric-value" id="metricResolved">--</span>
+                            <span class="dash-metric-label">Issue Resolved?</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sentiment Timeline -->
+                <div class="dash-card">
+                    <h3><i class="fas fa-chart-area"></i> Sentiment Timeline</h3>
+                    <canvas id="sentimentChart" height="200"></canvas>
+                </div>
+
+                <!-- Anger Trigger -->
+                <div class="dash-card anger-card">
+                    <h3><i class="fas fa-fire-alt"></i> Anger Trigger Point</h3>
+                    <div class="anger-info" id="angerInfo">
+                        <div class="anger-timestamp"><span id="angerTime">--:--</span></div>
+                        <p id="angerContext">No anger detected</p>
+                    </div>
+                </div>
+
+                <!-- Issue & Resolution -->
+                <div class="dash-two-col">
+                    <div class="dash-card">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Main Issue</h3>
+                        <p id="mainIssue" class="dash-text-content">--</p>
+                    </div>
+                    <div class="dash-card">
+                        <h3><i class="fas fa-clipboard-check"></i> Resolution Summary</h3>
+                        <p id="resolutionSummary" class="dash-text-content">--</p>
+                    </div>
+                </div>
+
+                <!-- Ratings -->
+                <div class="dash-two-col">
+                    <div class="dash-card rating-card">
+                        <h3><i class="fas fa-user"></i> Customer Rating</h3>
+                        <div class="rating-display">
+                            <span class="rating-score" id="custRating">-</span>
+                            <span class="rating-max">/10</span>
+                        </div>
+                        <div class="rating-bar"><div class="rating-fill" id="custRatingBar" style="width:0%"></div></div>
+                    </div>
+                    <div class="dash-card rating-card">
+                        <h3><i class="fas fa-headset"></i> Host Rating</h3>
+                        <div class="rating-display">
+                            <span class="rating-score" id="hostRating">-</span>
+                            <span class="rating-max">/10</span>
+                        </div>
+                        <div class="rating-bar"><div class="rating-fill host-fill" id="hostRatingBar" style="width:0%"></div></div>
+                    </div>
+                </div>
+
+                <!-- Transcript -->
+                <div class="dash-card">
+                    <h3><i class="fas fa-file-alt"></i> Transcript</h3>
+                    <div class="transcript-box" id="transcriptBox">
+                        <p>Transcript will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Upload Panel -->
+        <div class="demo-upload-panel">
+            <div class="upload-header">
+                <h2><i class="fas fa-upload"></i> Upload File</h2>
+                <p>Upload an audio recording or a text transcript for analysis.</p>
+            </div>
+
+            <div class="upload-tabs">
+                <button class="upload-tab active" id="tabAudio" onclick="switchTab('audio')">
+                    <i class="fas fa-microphone"></i> Audio File
+                </button>
+                <button class="upload-tab" id="tabTranscript" onclick="switchTab('transcript')">
+                    <i class="fas fa-file-alt"></i> Transcript
+                </button>
+            </div>
+
+            <!-- Audio Upload -->
+            <div class="upload-section" id="audioSection">
+                <div class="upload-dropzone" id="audioDropzone">
+                    <div class="dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <p class="dropzone-text">Drag & drop audio file here</p>
+                    <span class="dropzone-hint">or click to browse</span>
+                    <span class="dropzone-formats">MP3, WAV, M4A, OGG, FLAC</span>
+                    <input type="file" id="audioInput" accept="audio/*" hidden>
+                </div>
+                <div class="upload-file-info" id="audioFileInfo" style="display:none;">
+                    <i class="fas fa-file-audio"></i>
+                    <span id="audioFileName">--</span>
+                    <button class="remove-file" onclick="removeFile('audio')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="language-select">
+                    <label>Language (auto-detect if unsure):</label>
+                    <select id="langSelect">
+                        <option value="auto">Auto Detect</option>
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="te">Telugu</option>
+                        <option value="ta">Tamil</option>
+                        <option value="kn">Kannada</option>
+                        <option value="ml">Malayalam</option>
+                        <option value="mr">Marathi</option>
+                        <option value="bn">Bengali</option>
+                    </select>
+                </div>
+                <div class="pipeline-info">
+                    <h4>Processing Pipeline:</h4>
+                    <div class="pipeline-step-mini"><span class="step-dot active"></span> Audio → Whisper (Speech-to-Text)</div>
+                    <div class="pipeline-step-mini"><span class="step-dot"></span> Transcript → Speaker Diarization</div>
+                    <div class="pipeline-step-mini"><span class="step-dot"></span> Text → LLM Sentiment Analysis</div>
+                    <div class="pipeline-step-mini"><span class="step-dot"></span> Output → Dashboard Metrics</div>
+                </div>
+            </div>
+
+            <!-- Transcript Upload -->
+            <div class="upload-section" id="transcriptSection" style="display:none;">
+                <div class="upload-dropzone" id="transcriptDropzone">
+                    <div class="dropzone-icon"><i class="fas fa-file-upload"></i></div>
+                    <p class="dropzone-text">Drag & drop transcript file</p>
+                    <span class="dropzone-hint">or click to browse</span>
+                    <span class="dropzone-formats">TXT, SRT, VTT, CSV</span>
+                    <input type="file" id="transcriptInput" accept=".txt,.srt,.vtt,.csv" hidden>
+                </div>
+                <div class="upload-file-info" id="transcriptFileInfo" style="display:none;">
+                    <i class="fas fa-file-alt"></i>
+                    <span id="transcriptFileName">--</span>
+                    <button class="remove-file" onclick="removeFile('transcript')"><i class="fas fa-times"></i></button>
+                </div>
+                <textarea id="pasteTranscript" class="paste-area" placeholder="Or paste transcript text here...&#10;&#10;Customer: Hello, I have an issue with...&#10;Host: Hi, how can I help you today?"></textarea>
+                <div class="pipeline-info">
+                    <h4>Processing Pipeline:</h4>
+                    <div class="pipeline-step-mini"><span class="step-dot skipped"></span> <s>Audio → Speech-to-Text</s> <em>(skipped)</em></div>
+                    <div class="pipeline-step-mini"><span class="step-dot active"></span> Transcript → Speaker Identification</div>
+                    <div class="pipeline-step-mini"><span class="step-dot"></span> Text → LLM Sentiment Analysis</div>
+                    <div class="pipeline-step-mini"><span class="step-dot"></span> Output → Dashboard Metrics</div>
+                </div>
+            </div>
+
+            <button class="btn-primary btn-large analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+                <span><i class="fas fa-bolt"></i> &nbsp;Analyze Call</span>
+                <div class="btn-glow"></div>
+            </button>
+
+            <div class="processing-indicator" id="processingIndicator" style="display:none;">
+                <div class="processing-spinner"></div>
+                <span id="processingText">Processing audio...</span>
+            </div>
+
+            <div class="tech-badge">
+                <span>Powered by</span>
+                <div class="tech-logos">
+                    <span class="tech-tag">Whisper</span>
+                    <span class="tech-tag">LLaMA</span>
+                    <span class="tech-tag">Mistral</span>
+                </div>
+                <button onclick="testConnection()" style="margin-top:0.8rem;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);padding:0.4rem 0.8rem;border-radius:4px;font-size:0.7rem;cursor:pointer;">🔌 Test API Connection</button>
+                <div id="testResult" style="margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted);"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="vani-demo.js"></script>
+</body>
+</html>

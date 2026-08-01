@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmo Soil - Smart Real Estate Research | Ekam-AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="cosmo-soil.html" class="nav-link active">Cosmo-Soil</a>
+                <a href="svasya-ai.html" class="nav-link">Svasya-AI</a>
+                <a href="retail.html" class="nav-link">Retail</a>
+                <a href="vani-ai.html" class="nav-link">Vani-AI</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="careers.html" class="nav-link">Careers</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="page-hero-bg"></div>
+        <div class="page-hero-content animate-on-scroll">
+            <img src="images/cosmosoil logo.jpg" alt="Cosmo Soil" class="page-hero-logo-img">
+            <h1 class="page-hero-title">COSMO <span class="gradient-text">SOIL</span></h1>
+            <p class="page-hero-subtitle">The Intelligence Ecosystem for Real Estate</p>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <section class="stats-bar cosmo-stats">
+        <div class="section-container">
+            <div class="stats-row animate-on-scroll">
+                <div class="stat-block"><span class="stat-big" data-target="1370000">0</span><span class="stat-suffix">M</span><span class="stat-label">Organic Impressions</span></div>
+                <div class="stat-block"><span class="stat-big" data-target="11000">0</span><span class="stat-suffix">K+</span><span class="stat-label">Active Users</span></div>
+                <div class="stat-block"><span class="stat-big" data-target="1200000">0</span><span class="stat-suffix">M</span><span class="stat-label">Social Reach</span></div>
+                <div class="stat-block"><span class="stat-big" data-target="214">0</span><span class="stat-suffix">+</span><span class="stat-label">Verified Listings</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Product -->
+    <section class="section">
+        <div class="section-container">
+            <div class="content-block animate-on-scroll">
+                <p class="about-text lead">Cosmo Soil, the next-gen real estate portal, aims at making the experience of property discovery, assessment, and management easier. It promises to provide the best experience of real estate with the help of cutting-edge technology, data intelligence, and service.</p>
+                <p class="about-text">The most exciting aspect of the Cosmo Soil experience is the decision-making process. It utilizes the best of AI technology, which provides the best suggestions based on the trends of the market, infrastructure development, and personal interests. It makes the experience of property buying more intelligent, as the decision does not remain a guesswork experience; it becomes more personalized.</p>
+                <p class="about-text">Moreover, Cosmo Soil equips users with tools and information such as price comparisons and financial tools that help them make informed decisions. The tools and information help users make decisions in an untransparent market.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FIYLO AI Section -->
+    <section class="section" style="background: var(--bg-secondary);">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">PROPERTY MATCHMAKER</span>
+                <h2 class="section-title">Connecting Genuine Buyers, <span class="gradient-text">Verified Sellers</span>, Quality Tenants</h2>
+            </div>
+            <div class="three-col-grid animate-on-scroll">
+                <div class="feature-block">
+                    <div class="feature-icon"><i class="fas fa-home"></i></div>
+                    <h3>Buy</h3>
+                    <p>Discover your perfect property. Browse through hundreds of verified listings across India, enhanced with AI insights and ROI analysis.</p>
+                    <a href="https://cosmo-soil.com/" class="product-cta" target="_blank"><span>View Properties</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="feature-block">
+                    <div class="feature-icon"><i class="fas fa-tag"></i></div>
+                    <h3>Sell</h3>
+                    <p>Post your property ads for free. Gain access to a wider reach, improved exposure, and dedicated support to close deals faster.</p>
+                    <a href="https://cosmo-soil.com/sell" class="product-cta" target="_blank"><span>Sell Your Property</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="feature-block">
+                    <div class="feature-icon"><i class="fas fa-key"></i></div>
+                    <h3>Rent</h3>
+                    <p>From tenant screening to lease agreements. Post rental ads easily or find the perfect rental home tailored to your lifestyle.</p>
+                    <a href="https://cosmo-soil.com/rent-a-property" class="product-cta" target="_blank"><span>View Properties</span><i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lifecycle Services -->
+    <section class="section">
+        <div class="section-container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">COMPLETE PROPERTY LIFECYCLE</span>
+                <h2 class="section-title">End-to-End <span class="gradient-text">Services</span></h2>
+            </div>
+            <div class="services-grid-4 animate-on-scroll">
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/loan-against-property" target="_blank"><i class="fas fa-landmark"></i><h4>Home Loans</h4><p>Up to 75% property value financing, lower interest rates, and seamless approvals.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/legal-property-documentation-services" target="_blank"><i class="fas fa-file-contract"></i><h4>Legal & Documentation</h4><p>Hassle-free background investigations, verification, and registration support.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/architectural-services" target="_blank"><i class="fas fa-drafting-compass"></i><h4>Architectural Design</h4><p>Connect with top architects for space optimization and sustainable building.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/vastu-consultant-services" target="_blank"><i class="fas fa-om"></i><h4>Vastu Consultation</h4><p>Blend ancient wisdom with modern tech. Complete property analysis and remedies.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/interior-design-services" target="_blank"><i class="fas fa-paint-roller"></i><h4>Interior Designs</h4><p>Transform your space with expert interior designers and modern aesthetics.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/packers-and-movers-india" target="_blank"><i class="fas fa-truck-moving"></i><h4>Movers & Packers</h4><p>Reliable moving partners for stress-free, nationwide relocation.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/home-maintenance-services" target="_blank"><i class="fas fa-wrench"></i><h4>Home Maintenance</h4><p>Verified technicians for plumbing, electrical, carpentry, and more.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/rental-furniture-services" target="_blank"><i class="fas fa-couch"></i><h4>Rental Furniture</h4><p>Budget-friendly, high-quality furniture on rent for immediate setups.</p></a></div>
+                <div class="mini-service"><a href="https://cosmo-soil.com/services/event-management-services" target="_blank"><i class="fas fa-glass-cheers"></i><h4>Event Management</h4><p>Professionally organized housewarming and celebratory events.</p></a></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section cta-section">
+        <div class="cta-bg-effects"><div class="cta-orb cta-orb-1"></div><div class="cta-orb cta-orb-2"></div></div>
+        <div class="section-container">
+            <div class="cta-content animate-on-scroll">
+                <h2 class="cta-title">Ready to Transform Your <span class="gradient-text">Real Estate Journey?</span></h2>
+                <p class="cta-text">Join 11,000+ active users leveraging Cosmo-Soil's AI intelligence.</p>
+                <a href="https://cosmo-soil.com/" class="btn-primary btn-large" target="_blank"><span>Explore Cosmo-Soil.com</span><div class="btn-glow"></div></a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-bottom">
+                <p>COPYRIGHT &copy; 2024 EKAM AI - ALL RIGHTS RESERVED.</p>
+                <div class="footer-nav-links">
+                    <a href="index.html">Home</a><a href="cosmo-soil.html">Cosmo-Soil</a><a href="svasya-ai.html">Svasya-AI</a><a href="retail.html">Retail</a><a href="services.html">Services</a><a href="careers.html">Careers</a><a href="contact.html">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
