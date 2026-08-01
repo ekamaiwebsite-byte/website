@@ -318,13 +318,22 @@ async function runAnalysis() {
         activatePipelineStep(1);
         completePipelineStep(1);
 
-        // Step 3: LLM Analysis
+        // If we have utterances from AssemblyAI, format transcript with speaker labels for LLM
+        let llmTranscript = transcript;
+        if (utterances.length > 0) {
+            llmTranscript = utterances.map(u => {
+                const spk = u.speaker === 'A' ? 'Speaker 1' : 'Speaker 2';
+                return spk + ': ' + u.text;
+            }).join('\n');
+        }
+
+        // Step 3: LLM Analysis (pass speaker-labeled transcript)
         activatePipelineStep(2);
-        const results = await analyzeSentiment(transcript, audioDuration);
+        const results = await analyzeSentiment(llmTranscript, audioDuration);
         results.transcript = transcript;
         results.audio_transcribed = hasAudio;
 
-        // Use AssemblyAI utterances for diarization if available (overrides LLM diarization)
+        // Use AssemblyAI utterances for diarization display (overrides LLM diarization)
         if (utterances.length > 0) {
             results.diarized_transcript = utterances.map(u => ({
                 speaker: u.speaker === 'A' ? 'Speaker 1' : 'Speaker 2',
