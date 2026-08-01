@@ -101,6 +101,16 @@ async function transcribeAudio(file) {
     return data.text || '';
 }
 
+// ===== LANGUAGE CHECK =====
+function isEnglishText(text) {
+    // Count ASCII letters vs non-ASCII characters
+    const asciiLetters = text.match(/[a-zA-Z]/g) || [];
+    const allLetters = text.match(/\p{L}/gu) || [];
+    if (allLetters.length === 0) return true;
+    const ratio = asciiLetters.length / allLetters.length;
+    return ratio > 0.7; // At least 70% English characters
+}
+
 
 // ===== STEP 2: TEXT → LLM ANALYSIS (via serverless proxy) =====
 async function analyzeSentiment(transcript, audioDuration) {
@@ -296,6 +306,11 @@ async function runAnalysis() {
             transcript = await transcriptFile.text();
         } else {
             transcript = pasteText;
+        }
+
+        // Language check - English only
+        if (!isEnglishText(transcript)) {
+            throw new Error('Non-English language detected. Currently, only English audio/transcripts are supported. Please upload an English dataset.');
         }
 
         // Step 2: Speaker Diarization + LLM Analysis
