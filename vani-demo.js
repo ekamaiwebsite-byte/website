@@ -75,34 +75,101 @@ function removeFile(type) {
 
 // ===== STEP 1: AUDIO → TEXT (AssemblyAI with Speaker Diarization) =====
 async function transcribeAudio(file) {
-    updateProcessing('Uploading audio for transcription...');
+    updateProcessing('Initializing transcription...');
 
+    // Get API key from our secure endpoint
+    const keyRes = await fetch('/api/get-key');
+    const keyData = await keyRes.json();
+    if (!keyRes.ok || !keyData.key) {
+        throw new Error('Failed to initialize: ' + (keyData.error || 'Unknown error'));
+    }
+    const API_KEY = keyData.key;
+
+    // Step 1: Upload audio directly to AssemblyAI (bypasses Vercel size limit)
+    updateProcessing('Uploading audio file...');
     const audioBytes = await file.arrayBuffer();
 
-    // Get selected language
+    const uploadRes = await fetch('https://api.assemblyai.com/v2/upload', {
+        method: 'POST',
+        headers: {
+            'Authorization': API_KEY,
+        },
+        body: audioBytes,
+    });
+
+    if (!uploadRes.ok) {
+        const errText = await uploadRes.text();
+        throw new Error('Upload failed: ' + errText.substring(0, 100));
+    }
+
+    const uploadData = await uploadRes.json();
+    const audioUrl = uploadData.upload_url;
+
+    // Step 2: Submit transcription job with speaker diarization
+    updateProcessing('Transcribing audio with speaker detection...');
     const langSelect = document.getElementById('langSelect');
     const lang = langSelect ? langSelect.value : 'auto';
-    const apiUrl = API_TRANSCRIBE + (lang !== 'auto' ? '?lang=' + lang : '?lang=auto');
 
-    let response;
-    try {
-        updateProcessing('Transcribing audio with speaker detection...');
-        response = await fetch(apiUrl, {
-            method: 'POST',
-            body: audioBytes
+    const transcriptPayload = {
+        audio_url: audioUrl,
+        speech_models: ['universal-3-5-pro', 'universal-2'],
+        speaker_labels: true,
+    };
+
+    if (lang && lang !== 'auto') {
+        transcriptPayload.language_code = lang;
+    } else {
+        transcriptPayload.language_detection = true;
+    }
+
+    const submitRes = await fetch('https://api.assemblyai.com/v2/transcript', {
+        method: 'POST',
+        headers: {
+            'Authorization': API_KEY,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transcriptPayload),
+    });
+
+    if (!submitRes.ok) {
+        const errText = await submitRes.text();
+        throw new Error('Transcription submit failed: ' + errText.substring(0, 100));
+    }
+
+    const submitData = await submitRes.json();
+    const transcriptId = submitData.id;
+
+    // Step 3: Poll for completion
+    updateProcessing('Processing audio (this may take a moment)...');
+    for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+
+        const pollRes = await fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+            headers: { 'Authorization': API_KEY },
         });
-    } catch (networkErr) {
-        throw new Error('Network error — cannot reach transcription API. (' + networkErr.message + ')');
-    }
 
-    const data = await response.json();
+        const pollData = await pollRes.json();
 
-    if (!response.ok) {
-        if (response.status === 504) {
-            throw new Error('Transcription timed out. Try a shorter audio file.');
+        if (pollData.status === 'completed') {
+            return {
+                text: pollData.text || '',
+                utterances: (pollData.utterances || []).map(u => ({
+                    speaker: u.speaker,
+                    text: u.text,
+                    start: u.start,
+                    end: u.end,
+                })),
+                audio_duration: pollData.audio_duration || null,
+                language_code: pollData.language_code || null,
+            };
+        } else if (pollData.status === 'error') {
+            throw new Error('Transcription failed: ' + (pollData.error || 'Unknown error'));
         }
-        throw new Error('Transcription error ' + response.status + ': ' + (data.error || 'Unknown error'));
+
+        updateProcessing('Processing audio (' + Math.round((i + 1) * 3) + 's)...');
     }
+
+    throw new Error('Transcription timed out. Try a shorter audio file.');
 
     // Return full response (includes utterances with speaker labels)
     return data;
