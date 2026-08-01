@@ -188,7 +188,13 @@ async function analyzeSentiment(transcript, audioDuration) {
         durationStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
     }
 
-    let analysisPrompt = 'You are an expert conversation analyst. Analyze this transcript and respond ONLY with valid JSON (no other text).\n\nSPEAKER RULES:\n- Use "Speaker 1" and "Speaker 2" to identify speakers. If there is only ONE speaker in the audio, use only "Speaker 1" and leave Speaker 2 fields as "N/A".\n- Split the transcript into INDIVIDUAL SENTENCES. Each sentence ending with a period (.), question mark (?), exclamation mark (!), or ellipsis (...) is a SEPARATE entry.\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. You MUST use this exact value for "duration_estimate".\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Speaker 1" or "Speaker 2", "text": "single sentence"} - one entry PER SENTENCE\n- "duration_estimate": "DURATION_PLACEHOLDER" (use this exact value)\n- "speaker_count": 1 or 2 (number of distinct speakers detected)\n- "speaker1_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "speaker2_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry", or "N/A" if single speaker\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": the main topic/issue discussed by BOTH speakers together (2-3 sentences). Consider what both Speaker 1 and Speaker 2 said.\n- "issue_resolved": one of "Yes", "No", "Partial", or "N/A" if not applicable\n- "resolution_summary": how the conversation concluded considering both speakers (2-3 sentences)\n- "speaker1_rating": Speaker 1 performance/satisfaction score 1-10\n- "speaker2_rating": Speaker 2 performance/satisfaction score 1-10, or 0 if single speaker\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Speaker 1" or "Speaker 2", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description"} — one entry per diarized turn\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
+    // Truncate transcript if too long (LLM has input limits)
+    let llmInput = transcript;
+    if (llmInput.length > 4000) {
+        llmInput = llmInput.substring(0, 4000) + '\n[... transcript truncated for analysis ...]';
+    }
+
+    let analysisPrompt = 'You are an expert conversation analyst. Analyze this transcript and respond ONLY with valid JSON (no other text). Do NOT include a diarized_transcript field.\n\nSPEAKER RULES:\n- The transcript has "Speaker 1" and "Speaker 2" labels. If only one speaker is present, set Speaker 2 fields to "N/A".\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. You MUST use this exact value for "duration_estimate".\n\nRequired JSON fields (respond with ONLY these, nothing else):\n- "duration_estimate": "DURATION_PLACEHOLDER" (use this exact value)\n- "speaker_count": 1 or 2\n- "speaker1_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "speaker2_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry", or "N/A" if single speaker\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": the main topic discussed by both speakers (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial", "N/A"\n- "resolution_summary": how the conversation concluded (2-3 sentences)\n- "speaker1_rating": score 1-10\n- "speaker2_rating": score 1-10, or 0 if single speaker\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Speaker 1" or "Speaker 2", "sentiment": -1.0 to 1.0, "summary": "3-5 words"} for up to 10 key moments\n\nTRANSCRIPT:\n' + llmInput + '\n\nRespond with ONLY the JSON object:';
 
     // Replace duration placeholder with actual value
     analysisPrompt = analysisPrompt.replace('DURATION_PLACEHOLDER', durationStr);
@@ -203,7 +209,7 @@ async function analyzeSentiment(transcript, audioDuration) {
             body: JSON.stringify({
                 inputs: analysisPrompt,
                 parameters: {
-                    max_new_tokens: 1500,
+                    max_new_tokens: 2000,
                     temperature: 0.1,
                     return_full_text: false,
                 }
@@ -265,16 +271,17 @@ function parseLLMResponse(text) {
     return {
         diarized_transcript: [],
         duration_estimate: "N/A",
-        customer_sentiment: "Unknown",
-        host_sentiment: "Unknown",
+        speaker_count: 1,
+        speaker1_sentiment: "Unknown",
+        speaker2_sentiment: "N/A",
         anger_triggered: false,
         anger_timestamp: "N/A",
         anger_context: "Could not parse LLM response",
-        main_issue: "Analysis failed — raw response: " + text.substring(0, 200),
+        main_issue: "Analysis failed. The audio may be too long or complex. Try a shorter recording.",
         issue_resolved: "Unknown",
-        resolution_summary: "Please try again",
-        customer_rating: 5,
-        host_rating: 5,
+        resolution_summary: "Please try again with a shorter audio file",
+        speaker1_rating: 5,
+        speaker2_rating: 0,
         sentiment_timeline: [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}],
     };
 }
