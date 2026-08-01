@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
     // Use HuggingFace router with OpenAI-compatible chat completions API
     // Model format: "model_id:provider"
     const payload = JSON.stringify({
-      model: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B',
+      model: 'Qwen/Qwen2.5-7B-Instruct',
       messages: [
         { role: 'user', content: inputs }
       ],
@@ -53,7 +53,8 @@ module.exports = async function handler(req, res) {
     const data = JSON.parse(hfResponse.body);
 
     if (hfResponse.statusCode !== 200) {
-      return res.status(hfResponse.statusCode).json({ error: data.error || JSON.stringify(data) });
+      const errMsg = typeof data === 'object' ? JSON.stringify(data) : String(data);
+      return res.status(hfResponse.statusCode).json({ error: errMsg });
     }
 
     // Convert chat completions response to the format our frontend expects
