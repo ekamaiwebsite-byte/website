@@ -276,6 +276,7 @@ async function runAnalysis() {
     // Show processing
     document.getElementById('analyzeBtn').style.display = 'none';
     document.getElementById('processingIndicator').style.display = 'flex';
+    resetPipelineSteps();
 
     try {
         let transcript = '';
@@ -283,11 +284,13 @@ async function runAnalysis() {
 
         // Step 1: Get transcript
         if (hasAudio) {
+            activatePipelineStep(0);
             // Get audio duration
             audioDuration = await getAudioDuration(audioFile);
             // Audio → Whisper → Text
             transcript = await transcribeAudio(audioFile);
             if (!transcript.trim()) throw new Error('Whisper returned empty transcript. Try a clearer audio file.');
+            completePipelineStep(0);
         } else if (hasTranscriptFile) {
             // Read file content
             transcript = await transcriptFile.text();
@@ -295,10 +298,14 @@ async function runAnalysis() {
             transcript = pasteText;
         }
 
-        // Step 2: LLM Analysis
+        // Step 2: Speaker Diarization + LLM Analysis
+        activatePipelineStep(1);
+        completePipelineStep(1);
+        activatePipelineStep(2);
         const results = await analyzeSentiment(transcript, audioDuration);
         results.transcript = transcript;
         results.audio_transcribed = hasAudio;
+        completePipelineStep(2);
 
         // Override duration with actual audio duration if available
         if (audioDuration) {
@@ -308,9 +315,11 @@ async function runAnalysis() {
         }
 
         // Step 3: Display
+        activatePipelineStep(3);
         updateProcessing('Rendering dashboard...');
         await sleep(500);
         displayResults(results);
+        completePipelineStep(3);
 
     } catch (err) {
         alert('Error: ' + err.message);
@@ -323,6 +332,29 @@ async function runAnalysis() {
 function updateProcessing(text) {
     const el = document.getElementById('processingText');
     if (el) el.textContent = text;
+}
+
+// Pipeline step visual feedback
+function resetPipelineSteps() {
+    document.querySelectorAll('.pipeline-step-mini .step-dot').forEach(dot => {
+        dot.classList.remove('active', 'completed', 'processing');
+    });
+}
+
+function activatePipelineStep(index) {
+    const dots = document.querySelectorAll('.pipeline-step-mini .step-dot');
+    if (dots[index]) {
+        dots[index].classList.add('processing');
+        dots[index].classList.remove('completed');
+    }
+}
+
+function completePipelineStep(index) {
+    const dots = document.querySelectorAll('.pipeline-step-mini .step-dot');
+    if (dots[index]) {
+        dots[index].classList.remove('processing');
+        dots[index].classList.add('completed');
+    }
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -380,14 +412,12 @@ function formatTranscript(text) {
 
 function formatDiarizedTranscript(turns) {
     return turns.map((turn, i) => {
-        const speaker = turn.speaker || 'Unknown';
         const text = turn.text || '';
-        const isHost = speaker.toLowerCase().includes('host') || speaker.toLowerCase().includes('agent');
-        const speakerClass = isHost ? 'speaker-host' : 'speaker-customer';
-        const icon = isHost ? '🎧' : '👤';
-        return `<div class="turn diarized-turn">
+        const speaker = (turn.speaker || '').toLowerCase();
+        const isHost = speaker.includes('host') || speaker.includes('agent');
+        const bgClass = isHost ? 'turn-host' : 'turn-customer';
+        return `<div class="turn diarized-turn ${bgClass}">
             <span class="turn-number">${i + 1}</span>
-            <span class="${speakerClass}">${icon} ${speaker}:</span>
             <span class="turn-text">${text}</span>
         </div>`;
     }).join('');
