@@ -103,10 +103,21 @@ async function transcribeAudio(file) {
 
 
 // ===== STEP 2: TEXT → LLM ANALYSIS (via serverless proxy) =====
-async function analyzeSentiment(transcript) {
+async function analyzeSentiment(transcript, audioDuration) {
     updateProcessing('Running sentiment analysis (LLM)...');
 
-    const analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nIMPORTANT: First, identify the speakers in the conversation. Label them as "Host" (the agent/executive/caller making the business call) and "Customer" (the person being called). Then reconstruct the conversation with speaker labels.\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Host" or "Customer", "text": "what they said"} for each dialogue turn\n- "duration_estimate": estimated call duration in "MM:SS" format\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Host" or "Customer", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description of what was said"}\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
+    // Format duration as MM:SS
+    let durationStr = 'Unknown';
+    if (audioDuration) {
+        const mins = Math.floor(audioDuration / 60);
+        const secs = Math.round(audioDuration % 60);
+        durationStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    let analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nIMPORTANT DIARIZATION RULES:\n- Identify speakers: "Host" (the agent/executive making the business call) and "Customer" (the person being called/responding).\n- Split the conversation into INDIVIDUAL sentences or short phrases. Each time a speaker says something (even one word like "Yes sir?" or "Okay"), that is a SEPARATE turn.\n- Do NOT merge multiple exchanges into one turn. If one person says "Hello" and the other responds "Hi" and the first says "How are you?", that is 3 turns, not 1.\n- Be very granular. A single continuous speech by one person before the other responds is ONE turn. As soon as the other person speaks, start a new turn.\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. Use this exact value.\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Host" or "Customer", "text": "what they said"} - one entry per uninterrupted speech segment\n- "duration_estimate": use the actual audio duration provided above\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Host" or "Customer", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description"} — one entry per diarized turn\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
+
+    // Replace duration placeholder with actual value
+    analysisPrompt = analysisPrompt.replace('DURATION_PLACEHOLDER', durationStr);
 
     let response;
     try {
@@ -235,6 +246,21 @@ function normalizeResult(data) {
 }
 
 
+// ===== GET AUDIO DURATION =====
+function getAudioDuration(file) {
+    return new Promise((resolve) => {
+        const audio = new Audio();
+        audio.addEventListener('loadedmetadata', () => {
+            resolve(audio.duration);
+            URL.revokeObjectURL(audio.src);
+        });
+        audio.addEventListener('error', () => {
+            resolve(null);
+        });
+        audio.src = URL.createObjectURL(file);
+    });
+}
+
 // ===== MAIN ANALYSIS FLOW =====
 async function runAnalysis() {
     const pasteText = document.getElementById('pasteTranscript')?.value || '';
@@ -253,9 +279,12 @@ async function runAnalysis() {
 
     try {
         let transcript = '';
+        let audioDuration = null;
 
         // Step 1: Get transcript
         if (hasAudio) {
+            // Get audio duration
+            audioDuration = await getAudioDuration(audioFile);
             // Audio → Whisper → Text
             transcript = await transcribeAudio(audioFile);
             if (!transcript.trim()) throw new Error('Whisper returned empty transcript. Try a clearer audio file.');
@@ -267,7 +296,7 @@ async function runAnalysis() {
         }
 
         // Step 2: LLM Analysis
-        const results = await analyzeSentiment(transcript);
+        const results = await analyzeSentiment(transcript, audioDuration);
         results.transcript = transcript;
         results.audio_transcribed = hasAudio;
 

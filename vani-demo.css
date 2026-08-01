@@ -80,6 +80,10 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
+.dash-card canvas {
+    width: 100%;
+    display: block;
+}
 .dash-card h3 {
     font-family: var(--font-alt);
     font-size: 0.95rem;
