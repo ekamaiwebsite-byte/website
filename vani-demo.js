@@ -121,7 +121,7 @@ async function analyzeSentiment(transcript, audioDuration) {
         durationStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
     }
 
-    let analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nDIARIZATION RULES:\n- Identify speakers: "Host" (the agent/executive making the business call) and "Customer" (the person being called/responding).\n- Split the transcript into INDIVIDUAL SENTENCES. Each sentence ending with a period (.), question mark (?), exclamation mark (!), or ellipsis (...) is a SEPARATE entry.\n- Assign each sentence to the correct speaker based on context.\n- Every single sentence gets its own entry. Do NOT combine multiple sentences into one entry.\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. You MUST use this exact value for "duration_estimate".\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Host" or "Customer", "text": "single sentence"} - one entry PER SENTENCE\n- "duration_estimate": "DURATION_PLACEHOLDER" (use this exact value)\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Host" or "Customer", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description"} — one entry per diarized turn\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
+    let analysisPrompt = 'You are an expert conversation analyst. Analyze this transcript and respond ONLY with valid JSON (no other text).\n\nSPEAKER RULES:\n- Use "Speaker 1" and "Speaker 2" to identify speakers. If there is only ONE speaker in the audio, use only "Speaker 1" and leave Speaker 2 fields as "N/A".\n- Split the transcript into INDIVIDUAL SENTENCES. Each sentence ending with a period (.), question mark (?), exclamation mark (!), or ellipsis (...) is a SEPARATE entry.\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. You MUST use this exact value for "duration_estimate".\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Speaker 1" or "Speaker 2", "text": "single sentence"} - one entry PER SENTENCE\n- "duration_estimate": "DURATION_PLACEHOLDER" (use this exact value)\n- "speaker_count": 1 or 2 (number of distinct speakers detected)\n- "speaker1_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "speaker2_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry", or "N/A" if single speaker\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": the main topic/issue discussed by BOTH speakers together (2-3 sentences). Consider what both Speaker 1 and Speaker 2 said.\n- "issue_resolved": one of "Yes", "No", "Partial", or "N/A" if not applicable\n- "resolution_summary": how the conversation concluded considering both speakers (2-3 sentences)\n- "speaker1_rating": Speaker 1 performance/satisfaction score 1-10\n- "speaker2_rating": Speaker 2 performance/satisfaction score 1-10, or 0 if single speaker\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Speaker 1" or "Speaker 2", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description"} — one entry per diarized turn\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
 
     // Replace duration placeholder with actual value
     analysisPrompt = analysisPrompt.replace('DURATION_PLACEHOLDER', durationStr);
@@ -216,25 +216,32 @@ function normalizeResult(data) {
     const defaults = {
         diarized_transcript: [],
         duration_estimate: "N/A",
-        customer_sentiment: "Neutral",
-        host_sentiment: "Professional",
+        speaker_count: 2,
+        speaker1_sentiment: "Neutral",
+        speaker2_sentiment: "Neutral",
         anger_triggered: false,
         anger_timestamp: "N/A",
         anger_context: "No anger detected",
         main_issue: "No issue detected",
         issue_resolved: "Unknown",
         resolution_summary: "N/A",
-        customer_rating: 5,
-        host_rating: 5,
+        speaker1_rating: 5,
+        speaker2_rating: 5,
         sentiment_timeline: [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}],
     };
+    // Support old field names mapping to new
+    if (data.customer_sentiment && !data.speaker1_sentiment) data.speaker1_sentiment = data.customer_sentiment;
+    if (data.host_sentiment && !data.speaker2_sentiment) data.speaker2_sentiment = data.host_sentiment;
+    if (data.customer_rating && !data.speaker1_rating) data.speaker1_rating = data.customer_rating;
+    if (data.host_rating && !data.speaker2_rating) data.speaker2_rating = data.host_rating;
+
     for (const key in defaults) {
         if (!(key in data)) data[key] = defaults[key];
     }
     // Clamp ratings
-    data.customer_rating = Math.max(1, Math.min(10, parseInt(data.customer_rating) || 5));
-    data.host_rating = Math.max(1, Math.min(10, parseInt(data.host_rating) || 5));
-    // Normalize timeline - support both old format (array of numbers) and new format (array of objects)
+    data.speaker1_rating = Math.max(1, Math.min(10, parseInt(data.speaker1_rating) || 5));
+    data.speaker2_rating = Math.max(0, Math.min(10, parseInt(data.speaker2_rating) || 0));
+    // Normalize timeline
     if (!Array.isArray(data.sentiment_timeline)) data.sentiment_timeline = [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}];
     data.sentiment_timeline = data.sentiment_timeline.map((v, i) => {
         if (typeof v === 'number') {
@@ -384,8 +391,8 @@ function displayResults(data) {
     document.getElementById('dashResults').style.display = 'block';
 
     document.getElementById('metricDuration').textContent = data.duration_estimate || 'N/A';
-    document.getElementById('metricCustSentiment').textContent = data.customer_sentiment || 'N/A';
-    document.getElementById('metricHostSentiment').textContent = data.host_sentiment || 'N/A';
+    document.getElementById('metricCustSentiment').textContent = data.speaker1_sentiment || 'N/A';
+    document.getElementById('metricHostSentiment').textContent = data.speaker2_sentiment || 'N/A';
     document.getElementById('metricResolved').textContent = data.issue_resolved || 'N/A';
 
     document.getElementById('angerTime').textContent = data.anger_timestamp || 'N/A';
@@ -394,12 +401,19 @@ function displayResults(data) {
     document.getElementById('mainIssue').textContent = data.main_issue || 'N/A';
     document.getElementById('resolutionSummary').textContent = data.resolution_summary || 'N/A';
 
-    const custRating = data.customer_rating || 5;
-    const hostRating = data.host_rating || 5;
-    document.getElementById('custRating').textContent = custRating;
-    document.getElementById('hostRating').textContent = hostRating;
-    document.getElementById('custRatingBar').style.width = (custRating * 10) + '%';
-    document.getElementById('hostRatingBar').style.width = (hostRating * 10) + '%';
+    const spk1Rating = data.speaker1_rating || 5;
+    const spk2Rating = data.speaker2_rating || 0;
+    document.getElementById('custRating').textContent = spk1Rating;
+    document.getElementById('hostRating').textContent = spk2Rating > 0 ? spk2Rating : 'N/A';
+    document.getElementById('custRatingBar').style.width = (spk1Rating * 10) + '%';
+    document.getElementById('hostRatingBar').style.width = (spk2Rating > 0 ? spk2Rating * 10 : 0) + '%';
+
+    // Hide Speaker 2 metrics if single speaker
+    if (data.speaker_count === 1 || data.speaker2_sentiment === 'N/A') {
+        document.getElementById('metricHostSentiment').textContent = 'N/A';
+        document.getElementById('hostRating').textContent = 'N/A';
+        document.getElementById('hostRatingBar').style.width = '0%';
+    }
 
     // Use diarized transcript if available, otherwise fall back to raw
     if (data.diarized_transcript && data.diarized_transcript.length > 0) {
@@ -410,8 +424,8 @@ function displayResults(data) {
 
     drawSentimentChart(data.sentiment_timeline || [{turn: 1, speaker: "Unknown", sentiment: 0, summary: "N/A"}]);
 
-    colorSentiment('metricCustSentiment', data.customer_sentiment);
-    colorSentiment('metricHostSentiment', data.host_sentiment);
+    colorSentiment('metricCustSentiment', data.speaker1_sentiment);
+    colorSentiment('metricHostSentiment', data.speaker2_sentiment);
     colorResolved('metricResolved', data.issue_resolved);
 }
 
@@ -433,8 +447,8 @@ function formatDiarizedTranscript(turns) {
     return turns.map((turn, i) => {
         const text = turn.text || '';
         const speaker = (turn.speaker || '').toLowerCase();
-        // Determine speaker type: Speaker A/1 = first speaker, Speaker B/2 = second speaker
-        const isFirstSpeaker = speaker.includes('a') || speaker.includes('1') || speaker.includes('host') || speaker.includes('agent');
+        // Speaker 1 or Speaker A = first speaker, Speaker 2 or Speaker B = second speaker
+        const isFirstSpeaker = speaker.includes('1') || speaker.includes('a') || speaker.includes('speaker 1');
         const bgClass = isFirstSpeaker ? 'turn-host' : 'turn-customer';
         return `<div class="turn diarized-turn ${bgClass}">
             <span class="turn-number">${i + 1}</span>
