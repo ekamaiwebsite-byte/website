@@ -391,6 +391,7 @@ body { font-family: var(--font-body); background: var(--bg-primary); color: var(
     .stats-row { flex-direction: column; gap: 1.5rem; }
     .highlight-items { flex-direction: column; gap: 0.8rem; }
     .three-col-grid { grid-template-columns: 1fr; }
+    .services-grid-4 { grid-template-columns: 1fr; }
     .about-capabilities { grid-template-columns: 1fr; }
     .rotating-ring { width: 220px; height: 220px; }
     .page-hero { min-height: 35vh; padding: 6rem 1.5rem 3rem; }
