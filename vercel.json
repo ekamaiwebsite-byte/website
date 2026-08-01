@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/api/transcribe", "destination": "/api/transcribe" },
+    { "source": "/api/analyze", "destination": "/api/analyze" }
+  ],
+  "functions": {
+    "api/transcribe.js": {
+      "maxDuration": 60
+    },
+    "api/analyze.js": {
+      "maxDuration": 60
+    }
+  }
+}

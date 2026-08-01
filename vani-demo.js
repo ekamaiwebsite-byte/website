@@ -2,13 +2,10 @@
 // No backend needed. Calls HF API directly from browser.
 
 // ============ CONFIGURATION ============
-const HF_TOKEN = "YOUR_HUGGINGFACE_TOKEN_HERE";
-
-// Models (hosted by HuggingFace, free tier)
-const WHISPER_MODEL = "openai/whisper-large-v3-turbo";
-const LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.3";
-
-const HF_INFERENCE_URL = "https://api-inference.huggingface.co/models/";
+// API calls are proxied through Vercel serverless functions (api/ folder)
+// The HF_TOKEN is stored securely as a Vercel environment variable
+const API_TRANSCRIBE = "/api/transcribe";
+const API_ANALYZE = "/api/analyze";
 // ========================================
 
 let currentTab = 'audio';
@@ -76,7 +73,7 @@ function removeFile(type) {
     }
 }
 
-// ===== STEP 1: AUDIO → TEXT (Whisper via HF Inference API) =====
+// ===== STEP 1: AUDIO → TEXT (Whisper via serverless proxy) =====
 async function transcribeAudio(file) {
     updateProcessing('Converting speech to text (Whisper)...');
 
@@ -84,34 +81,28 @@ async function transcribeAudio(file) {
 
     let response;
     try {
-        response = await fetch("https://api-inference.huggingface.co/models/" + WHISPER_MODEL, {
+        response = await fetch(API_TRANSCRIBE, {
             method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + HF_TOKEN,
-            },
             body: audioBytes
         });
     } catch (networkErr) {
-        throw new Error('Network error — cannot reach HuggingFace API. Check your internet connection. (' + networkErr.message + ')');
-    }
-
-    if (!response.ok) {
-        const errText = await response.text();
-        if (response.status === 503) {
-            throw new Error('Whisper model is loading (cold start). Please wait 30-60 seconds and click Analyze again.');
-        }
-        if (response.status === 401) {
-            throw new Error('Invalid HuggingFace token. Check HF_TOKEN in vani-demo.js');
-        }
-        throw new Error('Whisper API error ' + response.status + ': ' + errText);
+        throw new Error('Network error — cannot reach transcription API. (' + networkErr.message + ')');
     }
 
     const data = await response.json();
+
+    if (!response.ok) {
+        if (response.status === 503) {
+            throw new Error('Whisper model is loading (cold start). Please wait 30-60 seconds and click Analyze again.');
+        }
+        throw new Error('Transcription error ' + response.status + ': ' + (data.error || 'Unknown error'));
+    }
+
     return data.text || '';
 }
 
 
-// ===== STEP 2: TEXT → LLM ANALYSIS (Mistral via HF Inference API) =====
+// ===== STEP 2: TEXT → LLM ANALYSIS (Mistral via serverless proxy) =====
 async function analyzeSentiment(transcript) {
     updateProcessing('Running sentiment analysis (Mistral LLM)...');
 
@@ -119,10 +110,9 @@ async function analyzeSentiment(transcript) {
 
     let response;
     try {
-        response = await fetch("https://api-inference.huggingface.co/models/" + LLM_MODEL, {
+        response = await fetch(API_ANALYZE, {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + HF_TOKEN,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -135,31 +125,28 @@ async function analyzeSentiment(transcript) {
             })
         });
     } catch (networkErr) {
-        throw new Error('Network error — cannot reach HuggingFace API. Check your internet connection. (' + networkErr.message + ')');
+        throw new Error('Network error — cannot reach analysis API. (' + networkErr.message + ')');
     }
 
+    const data = await response.json();
+
     if (!response.ok) {
-        const errText = await response.text();
         if (response.status === 503) {
             throw new Error('Mistral model is loading (cold start). Please wait 1-2 minutes and click Analyze again.');
-        }
-        if (response.status === 401) {
-            throw new Error('Invalid HuggingFace token. Check HF_TOKEN in vani-demo.js');
         }
         if (response.status === 422) {
             throw new Error('Model input too long. Try a shorter transcript.');
         }
-        throw new Error('LLM API error ' + response.status + ': ' + errText);
+        throw new Error('Analysis error ' + response.status + ': ' + (data.error || 'Unknown error'));
     }
 
-    const data = await response.json();
     let generatedText = '';
     if (Array.isArray(data) && data[0]) {
         generatedText = data[0].generated_text || '';
     } else if (data.generated_text) {
         generatedText = data.generated_text;
     } else if (data.error) {
-        throw new Error('HF API error: ' + data.error);
+        throw new Error('API error: ' + data.error);
     }
 
     return parseLLMResponse(generatedText);
@@ -468,10 +455,9 @@ async function testConnection() {
     resultEl.style.color = '#f59e0b';
 
     try {
-        const res = await fetch("https://api-inference.huggingface.co/models/" + LLM_MODEL, {
+        const res = await fetch(API_ANALYZE, {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer ' + HF_TOKEN,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -486,16 +472,13 @@ async function testConnection() {
         } else if (res.status === 503) {
             resultEl.textContent = '⏳ Model is loading (cold start). Wait 1-2 min and retry.';
             resultEl.style.color = '#f59e0b';
-        } else if (res.status === 401) {
-            resultEl.textContent = '❌ Invalid token. Update HF_TOKEN in vani-demo.js';
-            resultEl.style.color = '#f72585';
         } else {
-            const errText = await res.text();
-            resultEl.textContent = '❌ Error ' + res.status + ': ' + errText.substring(0, 100);
+            const data = await res.json();
+            resultEl.textContent = '❌ Error ' + res.status + ': ' + (data.error || '').substring(0, 100);
             resultEl.style.color = '#f72585';
         }
     } catch (e) {
-        resultEl.textContent = '❌ Network error: ' + e.message + ' (Are you on file:// ? Use a local server)';
+        resultEl.textContent = '❌ Network error: ' + e.message;
         resultEl.style.color = '#f72585';
     }
 }
