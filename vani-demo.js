@@ -73,15 +73,21 @@ function removeFile(type) {
     }
 }
 
-// ===== STEP 1: AUDIO → TEXT (Whisper via serverless proxy) =====
+// ===== STEP 1: AUDIO → TEXT (AssemblyAI with Speaker Diarization) =====
 async function transcribeAudio(file) {
-    updateProcessing('Converting speech to text (Whisper)...');
+    updateProcessing('Uploading audio for transcription...');
 
     const audioBytes = await file.arrayBuffer();
 
+    // Get selected language
+    const langSelect = document.getElementById('langSelect');
+    const lang = langSelect ? langSelect.value : 'auto';
+    const apiUrl = API_TRANSCRIBE + (lang !== 'auto' ? '?lang=' + lang : '?lang=auto');
+
     let response;
     try {
-        response = await fetch(API_TRANSCRIBE, {
+        updateProcessing('Transcribing audio with speaker detection...');
+        response = await fetch(apiUrl, {
             method: 'POST',
             body: audioBytes
         });
@@ -92,23 +98,14 @@ async function transcribeAudio(file) {
     const data = await response.json();
 
     if (!response.ok) {
-        if (response.status === 503) {
-            throw new Error('Whisper model is loading (cold start). Please wait 30-60 seconds and click Analyze again.');
+        if (response.status === 504) {
+            throw new Error('Transcription timed out. Try a shorter audio file.');
         }
         throw new Error('Transcription error ' + response.status + ': ' + (data.error || 'Unknown error'));
     }
 
-    return data.text || '';
-}
-
-// ===== LANGUAGE CHECK =====
-function isEnglishText(text) {
-    // Count ASCII letters vs non-ASCII characters
-    const asciiLetters = text.match(/[a-zA-Z]/g) || [];
-    const allLetters = text.match(/\p{L}/gu) || [];
-    if (allLetters.length === 0) return true;
-    const ratio = asciiLetters.length / allLetters.length;
-    return ratio > 0.7; // At least 70% English characters
+    // Return full response (includes utterances with speaker labels)
+    return data;
 }
 
 
@@ -290,16 +287,18 @@ async function runAnalysis() {
 
     try {
         let transcript = '';
+        let utterances = [];
         let audioDuration = null;
 
         // Step 1: Get transcript
         if (hasAudio) {
             activatePipelineStep(0);
-            // Get audio duration
-            audioDuration = await getAudioDuration(audioFile);
-            // Audio → Whisper → Text
-            transcript = await transcribeAudio(audioFile);
-            if (!transcript.trim()) throw new Error('Whisper returned empty transcript. Try a clearer audio file.');
+            // Audio → AssemblyAI (transcription + speaker diarization)
+            const transcriptionResult = await transcribeAudio(audioFile);
+            transcript = transcriptionResult.text || '';
+            utterances = transcriptionResult.utterances || [];
+            audioDuration = transcriptionResult.audio_duration || null;
+            if (!transcript.trim()) throw new Error('Transcription returned empty. Try a clearer audio file.');
             completePipelineStep(0);
         } else if (hasTranscriptFile) {
             // Read file content
@@ -308,18 +307,23 @@ async function runAnalysis() {
             transcript = pasteText;
         }
 
-        // Language check - English only
-        if (!isEnglishText(transcript)) {
-            throw new Error('Non-English language detected. Currently, only English audio/transcripts are supported. Please upload an English dataset.');
-        }
-
-        // Step 2: Speaker Diarization + LLM Analysis
+        // Step 2: Speaker Diarization (already done by AssemblyAI for audio)
         activatePipelineStep(1);
         completePipelineStep(1);
+
+        // Step 3: LLM Analysis
         activatePipelineStep(2);
         const results = await analyzeSentiment(transcript, audioDuration);
         results.transcript = transcript;
         results.audio_transcribed = hasAudio;
+
+        // Use AssemblyAI utterances for diarization if available (overrides LLM diarization)
+        if (utterances.length > 0) {
+            results.diarized_transcript = utterances.map(u => ({
+                speaker: 'Speaker ' + u.speaker,
+                text: u.text,
+            }));
+        }
         completePipelineStep(2);
 
         // Override duration with actual audio duration if available
@@ -429,8 +433,9 @@ function formatDiarizedTranscript(turns) {
     return turns.map((turn, i) => {
         const text = turn.text || '';
         const speaker = (turn.speaker || '').toLowerCase();
-        const isHost = speaker.includes('host') || speaker.includes('agent');
-        const bgClass = isHost ? 'turn-host' : 'turn-customer';
+        // Determine speaker type: Speaker A/1 = first speaker, Speaker B/2 = second speaker
+        const isFirstSpeaker = speaker.includes('a') || speaker.includes('1') || speaker.includes('host') || speaker.includes('agent');
+        const bgClass = isFirstSpeaker ? 'turn-host' : 'turn-customer';
         return `<div class="turn diarized-turn ${bgClass}">
             <span class="turn-number">${i + 1}</span>
             <span class="turn-text">${text}</span>
