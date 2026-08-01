@@ -114,7 +114,7 @@ async function analyzeSentiment(transcript, audioDuration) {
         durationStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
     }
 
-    let analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nIMPORTANT DIARIZATION RULES:\n- Identify speakers: "Host" (the agent/executive making the business call) and "Customer" (the person being called/responding).\n- Split the conversation into INDIVIDUAL sentences or short phrases. Each time a speaker says something (even one word like "Yes sir?" or "Okay"), that is a SEPARATE turn.\n- Do NOT merge multiple exchanges into one turn. If one person says "Hello" and the other responds "Hi" and the first says "How are you?", that is 3 turns, not 1.\n- Be very granular. A single continuous speech by one person before the other responds is ONE turn. As soon as the other person speaks, start a new turn.\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. Use this exact value.\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Host" or "Customer", "text": "what they said"} - one entry per uninterrupted speech segment\n- "duration_estimate": use the actual audio duration provided above\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Host" or "Customer", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description"} — one entry per diarized turn\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
+    let analysisPrompt = 'You are an expert call center analyst. Analyze this telecall transcript and respond ONLY with valid JSON (no other text).\n\nDIARIZATION RULES:\n- Identify speakers: "Host" (the agent/executive making the business call) and "Customer" (the person being called/responding).\n- A "turn" is one speaker\'s complete uninterrupted speech before the other person responds. Split based on MEANING and CONTEXT, not by sentence.\n- When one person finishes speaking and the other starts, that is a new turn.\n- Short acknowledgments like "Yes sir", "Okay", "Hmm" that are responses from the other person should be their own turn.\n- If the same person says multiple sentences without being interrupted, keep them as ONE turn.\n\nDURATION: The actual audio duration is DURATION_PLACEHOLDER. You MUST use this exact value for "duration_estimate".\n\nRequired JSON fields:\n- "diarized_transcript": array of objects with {"speaker": "Host" or "Customer", "text": "what they said"} - one entry per speaker turn (a turn = everything one person says before the other responds)\n- "duration_estimate": "DURATION_PLACEHOLDER" (use this exact value)\n- "customer_sentiment": one of "Positive", "Neutral", "Negative", "Frustrated", "Angry"\n- "host_sentiment": one of "Professional", "Empathetic", "Neutral", "Rude", "Dismissive"\n- "anger_triggered": true or false\n- "anger_timestamp": "MM:SS" when anger started, or "N/A"\n- "anger_context": what triggered anger (1-2 sentences), or "No anger detected"\n- "main_issue": primary customer issue (2-3 sentences)\n- "issue_resolved": one of "Yes", "No", "Partial"\n- "resolution_summary": how resolved or why not (2-3 sentences)\n- "customer_rating": satisfaction score 1-10\n- "host_rating": performance score 1-10\n- "sentiment_timeline": array of objects with {"turn": 1, "speaker": "Host" or "Customer", "sentiment": number from -1.0 to 1.0, "summary": "brief 3-5 word description"} — one entry per diarized turn\n\nTRANSCRIPT:\n' + transcript + '\n\nRespond with ONLY the JSON object:';
 
     // Replace duration placeholder with actual value
     analysisPrompt = analysisPrompt.replace('DURATION_PLACEHOLDER', durationStr);
@@ -300,6 +300,13 @@ async function runAnalysis() {
         results.transcript = transcript;
         results.audio_transcribed = hasAudio;
 
+        // Override duration with actual audio duration if available
+        if (audioDuration) {
+            const mins = Math.floor(audioDuration / 60);
+            const secs = Math.round(audioDuration % 60);
+            results.duration_estimate = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+
         // Step 3: Display
         updateProcessing('Rendering dashboard...');
         await sleep(500);
@@ -424,7 +431,7 @@ function drawSentimentChart(data) {
     const values = points.map(p => p.sentiment);
 
     // Layout
-    const topPad = 35, bottomPad = 55, leftPad = 50, rightPad = 20;
+    const topPad = 20, bottomPad = 25, leftPad = 45, rightPad = 10;
     const graphW = w - leftPad - rightPad;
     const graphH = h - topPad - bottomPad;
     const zeroY = topPad + graphH / 2;
@@ -445,14 +452,12 @@ function drawSentimentChart(data) {
     ctx.fillRect(leftPad, zeroY, graphW, graphH / 2);
 
     // Grid lines with labels
-    ctx.font = '10px Inter, sans-serif';
+    ctx.font = '9px Inter, sans-serif';
     ctx.textAlign = 'right';
     const yLabels = [
-        { val: 1.0, label: 'Happy' },
-        { val: 0.5, label: 'Pleased' },
-        { val: 0, label: 'Neutral' },
-        { val: -0.5, label: 'Unhappy' },
-        { val: -1.0, label: 'Angry' }
+        { val: 1.0, label: '+1' },
+        { val: 0, label: '0' },
+        { val: -1.0, label: '-1' }
     ];
     yLabels.forEach(({ val, label }) => {
         const y = zeroY - val * (graphH / 2);
@@ -467,19 +472,19 @@ function drawSentimentChart(data) {
 
     // Title / Legend
     ctx.textAlign = 'left';
-    ctx.font = 'bold 11px Space Grotesk, sans-serif';
+    ctx.font = 'bold 9px Space Grotesk, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.fillText('Conversation Flow', leftPad, 14);
+    ctx.fillText('Conversation Flow', leftPad, 10);
 
     // Legend items
-    ctx.font = '9px Inter, sans-serif';
-    const legendX = leftPad + 140;
-    ctx.fillStyle = '#10b981'; ctx.fillRect(legendX, 7, 8, 8); 
-    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Positive', legendX + 12, 14);
-    ctx.fillStyle = '#f59e0b'; ctx.fillRect(legendX + 60, 7, 8, 8);
-    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Neutral', legendX + 74, 14);
-    ctx.fillStyle = '#f72585'; ctx.fillRect(legendX + 125, 7, 8, 8);
-    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Negative', legendX + 137, 14);
+    ctx.font = '8px Inter, sans-serif';
+    const legendX = leftPad + 100;
+    ctx.fillStyle = '#10b981'; ctx.fillRect(legendX, 5, 6, 6); 
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Positive', legendX + 9, 10);
+    ctx.fillStyle = '#f59e0b'; ctx.fillRect(legendX + 45, 5, 6, 6);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Neutral', legendX + 54, 10);
+    ctx.fillStyle = '#f72585'; ctx.fillRect(legendX + 88, 5, 6, 6);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fillText('Negative', legendX + 97, 10);
 
     if (values.length < 2) {
         ctx.fillStyle = 'rgba(255,255,255,0.3)';
@@ -539,43 +544,21 @@ function drawSentimentChart(data) {
 
         // Dot
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fillStyle = dotColor;
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
 
         // Turn number below x-axis
-        ctx.font = '9px Inter, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.fillText(points[i].turn || (i + 1), x, topPad + graphH + 14);
-
-        // Speaker indicator
-        const speaker = points[i].speaker || '';
-        const isHost = speaker.toLowerCase().includes('host');
         ctx.font = '7px Inter, sans-serif';
-        ctx.fillStyle = isHost ? 'rgba(139, 92, 246, 0.7)' : 'rgba(59, 130, 246, 0.7)';
-        ctx.fillText(isHost ? 'H' : 'C', x, topPad + graphH + 25);
-
-        // Summary tooltip (only show for key points - every other or when space allows)
-        const summary = points[i].summary || '';
-        if (summary && (values.length <= 6 || i % 2 === 0)) {
-            ctx.font = '8px Inter, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            const labelY = val >= 0 ? y + 16 : y - 10;
-            const maxChars = Math.floor(stepX / 4.5);
-            const truncated = summary.length > maxChars ? summary.substring(0, maxChars) + '..' : summary;
-            ctx.fillText(truncated, x, labelY);
-        }
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillText(points[i].turn || (i + 1), x, topPad + graphH + 10);
     }
 
     // X-axis label
-    ctx.font = '9px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '7px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.textAlign = 'center';
-    ctx.fillText('Turn #', leftPad + graphW / 2, topPad + graphH + 40);
-    ctx.fillText('(H = Host, C = Customer)', leftPad + graphW / 2, topPad + graphH + 50);
+    ctx.fillText('Turns →', leftPad + graphW / 2, topPad + graphH + 20);
 
     // Anger marker (lowest point)
     const minVal = Math.min(...values);
@@ -584,14 +567,10 @@ function drawSentimentChart(data) {
         const ax = leftPad + angerIdx * stepX;
         const ay = zeroY - values[angerIdx] * (graphH / 2);
         ctx.beginPath();
-        ctx.arc(ax, ay, 9, 0, Math.PI * 2);
+        ctx.arc(ax, ay, 5, 0, Math.PI * 2);
         ctx.strokeStyle = '#f72585';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
-        ctx.font = 'bold 9px Space Grotesk, sans-serif';
-        ctx.fillStyle = '#f72585';
-        ctx.textAlign = 'center';
-        ctx.fillText('Peak Negativity', ax, ay - 14);
     }
 }
 
