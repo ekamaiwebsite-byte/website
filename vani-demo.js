@@ -327,7 +327,7 @@ async function runAnalysis() {
         // Use AssemblyAI utterances for diarization if available (overrides LLM diarization)
         if (utterances.length > 0) {
             results.diarized_transcript = utterances.map(u => ({
-                speaker: 'Speaker ' + u.speaker,
+                speaker: u.speaker === 'A' ? 'Speaker 1' : 'Speaker 2',
                 text: u.text,
             }));
         }
@@ -446,9 +446,9 @@ function formatTranscript(text) {
 function formatDiarizedTranscript(turns) {
     return turns.map((turn, i) => {
         const text = turn.text || '';
-        const speaker = (turn.speaker || '').toLowerCase();
-        // Speaker 1 or Speaker A = first speaker, Speaker 2 or Speaker B = second speaker
-        const isFirstSpeaker = speaker.includes('1') || speaker.includes('a') || speaker.includes('speaker 1');
+        const speaker = turn.speaker || '';
+        // Check if this is Speaker 1 (first speaker)
+        const isFirstSpeaker = speaker === 'Speaker 1' || speaker === 'Speaker A' || speaker === 'A';
         const bgClass = isFirstSpeaker ? 'turn-host' : 'turn-customer';
         return `<div class="turn diarized-turn ${bgClass}">
             <span class="turn-number">${i + 1}</span>
