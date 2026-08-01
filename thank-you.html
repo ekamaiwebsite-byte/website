@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekam-AI | Form Submitted</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="images/Ekam AI Logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .thank-you-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 2rem;
+        }
+        .thank-you-icon {
+            font-size: 4rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .thank-you-container h1 {
+            font-family: var(--font-alt);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        .thank-you-container p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/EkamAI Logo 2.jpeg" alt="Ekam-AI" class="logo-img">
+                <span class="logo-text">EKAM<span class="logo-accent">-AI</span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="vani-ai.html" class="nav-link">Vani-AI</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="contact.html" class="nav-link nav-cta">Contact Us</a>
+            </div>
+            <div class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <div class="thank-you-container">
+        <div class="thank-you-icon"><i class="fas fa-check-circle"></i></div>
+        <h1>Form Submitted Successfully!</h1>
+        <p>Thank you for reaching out. Our team will review your submission and get back to you soon.</p>
+        <a href="index.html" class="btn-primary btn-large"><span><i class="fas fa-home"></i> &nbsp;Back to Home</span><div class="btn-glow"></div></a>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
